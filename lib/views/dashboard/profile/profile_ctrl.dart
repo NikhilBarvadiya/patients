@@ -1,0 +1,126 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:patients/models/models.dart';
+import 'package:patients/utils/config/session.dart';
+import 'package:patients/utils/helper.dart';
+import 'package:patients/utils/storage.dart';
+import 'package:patients/utils/toaster.dart';
+
+class ProfileCtrl extends GetxController {
+  var user = PatientModel(id: '1', name: 'Patient Name', email: 'patient@example.com', mobile: '+91 98765 43210', password: '********', address: '123, Patient Address, City, State, 395009').obs;
+  bool isEditMode = false;
+  var avatar = Rx<File?>(null);
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+
+  @override
+  void onInit() {
+    _loadUserData();
+    super.onInit();
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await read(AppSession.userData);
+    if (userData != null) {
+      user.value = PatientModel(
+        id: "1",
+        name: userData["name"] ?? 'Patient Name',
+        email: userData["email"] ?? 'patient@example.com',
+        mobile: userData["mobile"] ?? '+91 98765 43210',
+        password: userData["password"] ?? '********',
+        address: userData["address"] ?? '123, Patient Address, City, State, 395009',
+      );
+    }
+    nameController.text = user.value.name;
+    emailController.text = user.value.email;
+    mobileController.text = user.value.mobile;
+    addressController.text = user.value.address;
+  }
+
+  void toggleEditMode() {
+    isEditMode = !isEditMode;
+    if (!isEditMode) {
+      _loadUserData();
+    }
+    update();
+  }
+
+  Future<void> pickAvatar() async {
+    final result = await helper.pickImage();
+    if (result != null) {
+      avatar.value = result;
+      update();
+    }
+  }
+
+  void saveProfile() {
+    if (_validateForm()) {
+      updateProfile(name: nameController.text, email: emailController.text, mobile: mobileController.text, address: addressController.text);
+      isEditMode = false;
+      update();
+      toaster.success('Profile updated successfully');
+    }
+  }
+
+  bool _validateForm() {
+    if (nameController.text.isEmpty) {
+      toaster.warning('Please enter your full name');
+      return false;
+    }
+    if (emailController.text.isEmpty) {
+      toaster.warning('Please enter your email');
+      return false;
+    }
+    if (!GetUtils.isEmail(emailController.text)) {
+      toaster.warning('Please enter a valid email');
+      return false;
+    }
+    if (mobileController.text.isEmpty) {
+      toaster.warning('Please enter your mobile number');
+      return false;
+    }
+    if (!GetUtils.isPhoneNumber(mobileController.text)) {
+      toaster.warning('Please enter a valid mobile number');
+      return false;
+    }
+    if (addressController.text.isEmpty) {
+      toaster.warning('Please enter your address');
+      return false;
+    }
+    return true;
+  }
+
+  void updateProfile({required String name, required String email, required String mobile, required String address}) async {
+    try {
+      user.value = PatientModel(id: user.value.id, name: name, email: email, mobile: mobile, password: user.value.password, address: address);
+      final request = {'name': name, 'email': email, 'password': user.value.password, 'mobile': mobile, 'address': address};
+      await write(AppSession.userData, request);
+      update();
+    } catch (e) {
+      toaster.error('Failed to update profile: $e');
+    }
+  }
+
+  void logout() async {
+    try {
+      await clearStorage();
+      update();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to logout: $e', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  void deleteAccount() async {
+    try {
+      await clearStorage();
+      user.value = PatientModel(id: '', name: '', email: '', mobile: '', password: '', address: '');
+      update();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete account: $e', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+}

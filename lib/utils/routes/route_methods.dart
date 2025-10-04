@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:patients/utils/routes/route_name.dart';
-import 'package:patients/utils/routes/route_name.dart';
 import 'package:patients/views/auth/login/login.dart';
 import 'package:patients/views/auth/register/register.dart';
 import 'package:patients/views/dashboard/dashboard.dart';

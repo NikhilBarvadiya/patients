@@ -17,7 +17,7 @@ Future<void> main() async {
   GestureBinding.instance.resamplingEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('en', null);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Color(0xFF10B981), statusBarIconBrightness: Brightness.light));
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Color(0xFF2563EB), statusBarIconBrightness: Brightness.light));
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const RestartApp(child: MyApp()));
