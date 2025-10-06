@@ -8,7 +8,16 @@ import 'package:patients/utils/storage.dart';
 import 'package:patients/utils/toaster.dart';
 
 class ProfileCtrl extends GetxController {
-  var user = PatientModel(id: '1', name: 'Patient Name', email: 'patient@example.com', mobile: '+91 98765 43210', password: '********', address: '123, Patient Address, City, State, 395009').obs;
+  var user = PatientModel(
+    id: '1',
+    name: 'Patient Name',
+    email: 'patient@example.com',
+    mobile: '+91 98765 43210',
+    password: '********',
+    address: '123, Patient Address, City, State, 395009',
+    city: 'Surat',
+    state: 'Gujarat',
+  ).obs;
   bool isEditMode = false;
   var avatar = Rx<File?>(null);
 
@@ -16,6 +25,8 @@ class ProfileCtrl extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController stateController = TextEditingController();
 
   @override
   void onInit() {
@@ -33,11 +44,15 @@ class ProfileCtrl extends GetxController {
         mobile: userData["mobile"] ?? '+91 98765 43210',
         password: userData["password"] ?? '********',
         address: userData["address"] ?? '123, Patient Address, City, State, 395009',
+        city: userData["city"] ?? 'Surat',
+        state: userData["state"] ?? 'Gujarat',
       );
     }
     nameController.text = user.value.name;
     emailController.text = user.value.email;
     mobileController.text = user.value.mobile;
+    cityController.text = user.value.city;
+    stateController.text = user.value.state;
     addressController.text = user.value.address;
   }
 
@@ -59,7 +74,7 @@ class ProfileCtrl extends GetxController {
 
   void saveProfile() {
     if (_validateForm()) {
-      updateProfile(name: nameController.text, email: emailController.text, mobile: mobileController.text, address: addressController.text);
+      updateProfile(name: nameController.text, email: emailController.text, mobile: mobileController.text, city: cityController.text, state: stateController.text, address: addressController.text);
       isEditMode = false;
       update();
       toaster.success('Profile updated successfully');
@@ -94,10 +109,10 @@ class ProfileCtrl extends GetxController {
     return true;
   }
 
-  void updateProfile({required String name, required String email, required String mobile, required String address}) async {
+  void updateProfile({required String name, required String email, required String mobile, required String city, required String state, required String address}) async {
     try {
-      user.value = PatientModel(id: user.value.id, name: name, email: email, mobile: mobile, password: user.value.password, address: address);
-      final request = {'name': name, 'email': email, 'password': user.value.password, 'mobile': mobile, 'address': address};
+      user.value = PatientModel(id: user.value.id, name: name, email: email, mobile: mobile, password: user.value.password, city: city, state: state, address: address);
+      final request = {'name': name, 'email': email, 'password': user.value.password, 'mobile': mobile, 'city': city, 'state': state, 'address': address};
       await write(AppSession.userData, request);
       update();
     } catch (e) {
@@ -117,7 +132,7 @@ class ProfileCtrl extends GetxController {
   void deleteAccount() async {
     try {
       await clearStorage();
-      user.value = PatientModel(id: '', name: '', email: '', mobile: '', password: '', address: '');
+      user.value = PatientModel(id: '', name: '', email: '', mobile: '', password: '', address: '', city: '', state: '');
       update();
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete account: $e', snackPosition: SnackPosition.BOTTOM);

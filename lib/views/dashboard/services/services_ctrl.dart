@@ -8,7 +8,7 @@ class ServicesCtrl extends GetxController {
   var services = <ServiceModel>[].obs;
   var filteredServices = <ServiceModel>[].obs;
   var isLoading = false.obs;
-  var searchQuery = ''.obs, selectedTherapist = 'All'.obs;
+  var searchQuery = ''.obs;
   var therapists = <TherapistModel>[].obs;
 
   @override
@@ -193,33 +193,12 @@ class ServicesCtrl extends GetxController {
     applyFilters();
   }
 
-  void filterByTherapist(String therapistId) {
-    selectedTherapist.value = therapistId;
-    applyFilters();
-  }
-
   void applyFilters() {
     var filtered = services.where((service) => service.isActive).toList();
     if (searchQuery.value.isNotEmpty) {
       filtered = filtered.where((service) => service.name.toLowerCase().contains(searchQuery.value.toLowerCase())).toList();
     }
-    if (selectedTherapist.value != 'All') {
-      filtered = filtered.where((service) => service.therapistId == selectedTherapist.value).toList();
-    }
     filteredServices.value = filtered;
-  }
-
-  List<String> getTherapists() {
-    return ['All', ...therapists.map((t) => t.id)];
-  }
-
-  String getTherapistName(String therapistId) {
-    return therapists
-        .firstWhere(
-          (t) => t.id == therapistId,
-          orElse: () => TherapistModel(id: '', name: 'Unknown', email: '', specialty: '', experienceYears: 0, clinicName: '', clinicAddress: '', rating: 0, totalPatients: 0),
-        )
-        .name;
   }
 
   void bookDetails(ServiceModel service) {

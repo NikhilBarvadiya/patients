@@ -49,10 +49,7 @@ class Home extends StatelessWidget {
           ],
         ),
         SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [const SizedBox(height: 20), _buildBannerSection(), const SizedBox(height: 32), _buildUpcomingAppointments(), const SizedBox(height: 10), _buildFeaturedTherapists()],
-          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const SizedBox(height: 20), _buildBannerSection(), const SizedBox(height: 32), _buildUpcomingAppointments()]),
         ),
       ],
     );
@@ -233,92 +230,6 @@ class Home extends StatelessWidget {
               appointment.status.toUpperCase(),
               style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeaturedTherapists() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'Featured Therapists',
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: ctrl.viewAllTherapists,
-                child: Text(
-                  'See All',
-                  style: GoogleFonts.poppins(color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Obx(() {
-            if (ctrl.featuredTherapists.isEmpty) {
-              return _buildEmptyState('No therapists available', 'Check back later for featured therapists', Icons.people_outline);
-            }
-            return Column(children: ctrl.featuredTherapists.take(2).map((therapist) => _buildTherapistCard(therapist)).toList());
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTherapistCard(TherapistModel therapist) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.only(top: 16, bottom: 16, left: 16, right: 5),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(color: Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(25)),
-            child: Icon(Icons.person, color: Color(0xFF2563EB), size: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  therapist.name,
-                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-                ),
-                const SizedBox(height: 2),
-                Text(therapist.specialty, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber, size: 14),
-                    const SizedBox(width: 4),
-                    Text(therapist.rating.toString(), style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500)),
-                    const SizedBox(width: 8),
-                    Icon(Icons.people_outline, color: Colors.grey[500], size: 14),
-                    const SizedBox(width: 4),
-                    Text('${therapist.totalPatients}+ patients', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => ctrl.viewTherapistProfile(therapist),
-            icon: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
           ),
         ],
       ),

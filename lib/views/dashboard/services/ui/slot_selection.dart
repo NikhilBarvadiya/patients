@@ -17,7 +17,15 @@ class SlotSelectionScreen extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text('Select Time Slot', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Get.back()),
+        leading: IconButton(
+          style: ButtonStyle(
+            shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
+            backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

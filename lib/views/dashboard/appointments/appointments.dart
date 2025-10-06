@@ -49,26 +49,26 @@ class Appointments extends StatelessWidget {
   }
 
   Widget _buildFilterChips() {
+    if (ctrl.filters.isEmpty) {
+      return SizedBox.shrink();
+    }
     return SizedBox(
       height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: ctrl.filters.length,
+        padding: EdgeInsets.only(right: 8),
         itemBuilder: (context, index) {
           final filter = ctrl.filters[index];
           return Obx(
-            () => Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: FilterChip(
-                label: Text(filter),
-                selected: ctrl.selectedFilter.value == filter,
-                onSelected: (selected) => ctrl.changeFilter(filter),
-                selectedColor: Color(0xFF2563EB),
-                checkmarkColor: Colors.white,
-                labelStyle: GoogleFonts.poppins(color: ctrl.selectedFilter.value == filter ? Colors.white : Colors.grey[700], fontWeight: FontWeight.w500),
-                backgroundColor: Colors.grey[100],
-              ),
-            ),
+            () => FilterChip(
+              label: Text(filter),
+              selected: ctrl.selectedFilter.value == filter,
+              onSelected: (selected) => ctrl.changeFilter(filter),
+              selectedColor: Color(0xFF2563EB),
+              checkmarkColor: Colors.white,
+              labelStyle: GoogleFonts.poppins(color: ctrl.selectedFilter.value == filter ? Colors.white : Colors.grey[700], fontWeight: FontWeight.w500),
+              backgroundColor: Colors.grey[100],
+            ).paddingOnly(right: 8),
           );
         },
       ),

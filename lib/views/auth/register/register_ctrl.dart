@@ -10,6 +10,8 @@ class RegisterCtrl extends GetxController {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final mobileCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  final stateCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
   var isLoading = false.obs, isPasswordVisible = false.obs;
@@ -38,12 +40,26 @@ class RegisterCtrl extends GetxController {
     if (!GetUtils.isPhoneNumber(mobileCtrl.text)) {
       return toaster.warning('Please enter a valid mobile number');
     }
+    if (cityCtrl.text.isEmpty) {
+      return toaster.warning('Please enter your city');
+    }
+    if (stateCtrl.text.isEmpty) {
+      return toaster.warning('Please enter your state');
+    }
     if (addressCtrl.text.isEmpty) {
       return toaster.warning('Please enter your address');
     }
     isLoading.value = true;
     try {
-      final request = {'name': nameCtrl.text.trim(), 'email': emailCtrl.text.trim(), 'password': passwordCtrl.text.trim(), 'mobile': mobileCtrl.text.trim(), 'address': addressCtrl.text.trim()};
+      final request = {
+        'name': nameCtrl.text.trim(),
+        'email': emailCtrl.text.trim(),
+        'password': passwordCtrl.text.trim(),
+        'mobile': mobileCtrl.text.trim(),
+        'city': cityCtrl.text,
+        'state': stateCtrl.text,
+        'address': addressCtrl.text.trim(),
+      };
       await write(AppSession.token, DateTime.now().toIso8601String());
       await write(AppSession.userData, request);
       toaster.success("Welcome to HealSync! Your account has been created.");

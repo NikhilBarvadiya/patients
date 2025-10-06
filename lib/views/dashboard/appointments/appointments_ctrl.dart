@@ -103,7 +103,6 @@ class AppointmentsCtrl extends GetxController {
   void cancelAppointment(String appointmentId) {
     final appointment = appointments.firstWhere((app) => app.id == appointmentId);
     final index = appointments.indexWhere((app) => app.id == appointmentId);
-
     appointments[index] = appointment.copyWith(status: 'cancelled');
     update();
   }
@@ -111,7 +110,6 @@ class AppointmentsCtrl extends GetxController {
   void rescheduleAppointment(String appointmentId, String newDate, String newTime) {
     final appointment = appointments.firstWhere((app) => app.id == appointmentId);
     final index = appointments.indexWhere((app) => app.id == appointmentId);
-
     appointments[index] = appointment.copyWith(date: newDate, time: newTime, status: 'pending');
     update();
   }

@@ -33,57 +33,31 @@ class Services extends StatelessWidget {
                 Obx(() => Text('${ctrl.filteredServices.length} services available', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]))),
               ],
             ),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black87),
-              onPressed: () => Get.back(),
-            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(left: 20, right: 20, top: 18),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search services...',
-                      hintStyle: GoogleFonts.poppins(color: Colors.grey[600]),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear, color: Colors.grey[600]),
-                              onPressed: () {
-                                searchController.clear();
-                                ctrl.searchServices('');
-                              },
-                            )
-                          : SizedBox.shrink(),
-                    ),
-                    style: GoogleFonts.poppins(fontSize: 14),
-                    onChanged: ctrl.searchServices,
-                  ),
-                  const SizedBox(height: 12),
-                  Obx(
-                    () => DropdownButtonFormField<String>(
-                      value: ctrl.selectedTherapist.value,
-                      items: ctrl.getTherapists().map((therapistId) {
-                        return DropdownMenuItem<String>(
-                          value: therapistId,
-                          child: Text(therapistId == 'All' ? 'All Therapists' : ctrl.getTherapistName(therapistId), style: GoogleFonts.poppins(fontSize: 14)),
-                        );
-                      }).toList(),
-                      onChanged: (value) => ctrl.filterByTherapist(value!),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      ),
-                    ),
-                  ),
-                ],
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search services...',
+                  hintStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  suffixIcon: searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: Colors.grey[600]),
+                          onPressed: () {
+                            searchController.clear();
+                            ctrl.searchServices('');
+                          },
+                        )
+                      : SizedBox.shrink(),
+                ),
+                style: GoogleFonts.poppins(fontSize: 14),
+                onChanged: ctrl.searchServices,
               ),
             ),
           ),
@@ -201,7 +175,6 @@ class Services extends StatelessWidget {
           onPressed: () {
             final ctrl = Get.find<ServicesCtrl>();
             ctrl.searchServices('');
-            ctrl.filterByTherapist('All');
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF2563EB),

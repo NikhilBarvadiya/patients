@@ -3,8 +3,6 @@ import 'package:patients/models/models.dart';
 import 'package:patients/utils/config/session.dart';
 import 'package:patients/utils/storage.dart';
 import 'package:patients/views/dashboard/dashboard_ctrl.dart';
-import 'package:patients/views/dashboard/therapists/therapists.dart';
-import 'package:patients/views/dashboard/therapists/ui/therapist_details.dart';
 
 class HomeCtrl extends GetxController {
   var userName = ''.obs;
@@ -97,8 +95,4 @@ class HomeCtrl extends GetxController {
     DashboardCtrl ctrl = Get.put(DashboardCtrl());
     ctrl.changeTab(2);
   }
-
-  void viewAllTherapists() => Get.to(() => Therapists());
-
-  void viewTherapistProfile(TherapistModel therapist) => Get.to(() => TherapistDetails(therapist: therapist));
 }

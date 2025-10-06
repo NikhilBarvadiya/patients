@@ -6,9 +6,11 @@ class PatientModel {
   final String email;
   final String mobile;
   final String password;
+  final String city;
+  final String state;
   final String address;
 
-  PatientModel({required this.id, required this.name, required this.email, required this.mobile, required this.password, required this.address});
+  PatientModel({required this.id, required this.name, required this.email, required this.mobile, required this.password, required this.city, required this.state, required this.address});
 }
 
 class TherapistModel {

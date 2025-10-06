@@ -28,7 +28,12 @@ class ServiceDetails extends StatelessWidget {
               style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black87),
+              style: ButtonStyle(
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
+                backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+              ),
+              icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
               onPressed: () => Get.back(),
             ),
           ),
