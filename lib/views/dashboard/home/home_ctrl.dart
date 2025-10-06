@@ -42,42 +42,6 @@ class HomeCtrl extends GetxController {
     ),
   ].obs;
 
-  var featuredTherapists = <TherapistModel>[
-    TherapistModel(
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      email: 'sarah.j@example.com',
-      specialty: 'Orthopedic Physiotherapy',
-      experienceYears: 8,
-      clinicName: 'Bone & Joint Care',
-      clinicAddress: '123, Health Street, Surat',
-      rating: 4.8,
-      totalPatients: 120,
-    ),
-    TherapistModel(
-      id: '2',
-      name: 'Dr. Mike Wilson',
-      email: 'mike.w@example.com',
-      specialty: 'Neuro Physiotherapy',
-      experienceYears: 12,
-      clinicName: 'Neuro Care Center',
-      clinicAddress: '456, Brain Road, Surat',
-      rating: 4.9,
-      totalPatients: 150,
-    ),
-    TherapistModel(
-      id: '3',
-      name: 'Dr. Emily Davis',
-      email: 'emily.d@example.com',
-      specialty: 'Sports Medicine',
-      experienceYears: 6,
-      clinicName: 'Sports Therapy Hub',
-      clinicAddress: '789, Fitness Lane, Surat',
-      rating: 4.7,
-      totalPatients: 90,
-    ),
-  ].obs;
-
   @override
   void onInit() {
     super.onInit();

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,8 +45,6 @@ class ServiceDetails extends StatelessWidget {
                   _buildServiceHeaderCard(service),
                   const SizedBox(height: 24),
                   _buildDetailsSection(service),
-                  const SizedBox(height: 24),
-                  _buildTherapistSection(service, ctrl),
                   const SizedBox(height: 24),
                   _buildActionButtons(service, ctrl),
                 ],
@@ -115,72 +112,6 @@ class ServiceDetails extends StatelessWidget {
           _buildDetailItem(icon: Icons.description_outlined, label: 'Description', value: service.description),
           const SizedBox(height: 12),
           _buildDetailItem(icon: Icons.category_outlined, label: 'Category', value: 'Physiotherapy'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTherapistSection(ServiceModel service, ServicesCtrl ctrl) {
-    final therapist = ctrl.therapists.firstWhereOrNull((t) => t.id == service.therapistId);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Therapist',
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-          ),
-          const SizedBox(height: 16),
-          if (therapist != null)
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(color: Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(25)),
-                  child: therapist.image != null && therapist.image!.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(25),
-                          child: CachedNetworkImage(
-                            imageUrl: therapist.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => CircularProgressIndicator(color: Color(0xFF2563EB)),
-                            errorWidget: (context, url, error) => Icon(Icons.person, color: Color(0xFF2563EB), size: 24),
-                          ),
-                        )
-                      : Icon(Icons.person, color: Color(0xFF2563EB), size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        therapist.name,
-                        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-                      ),
-                      Text(therapist.specialty, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 14),
-                          const SizedBox(width: 4),
-                          Text(therapist.rating.toString(), style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          else
-            Text('Therapist information not available', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
         ],
       ),
     );

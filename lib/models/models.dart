@@ -13,34 +13,6 @@ class PatientModel {
   PatientModel({required this.id, required this.name, required this.email, required this.mobile, required this.password, required this.city, required this.state, required this.address});
 }
 
-class TherapistModel {
-  final String id;
-  final String name;
-  final String email;
-  final String specialty;
-  final int experienceYears;
-  final String clinicName;
-  final String clinicAddress;
-  final double rating;
-  final int totalPatients;
-  final String? image;
-  final Map<String, List<String>>? availability;
-
-  TherapistModel({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.specialty,
-    required this.experienceYears,
-    required this.clinicName,
-    required this.clinicAddress,
-    required this.rating,
-    required this.totalPatients,
-    this.image,
-    this.availability,
-  });
-}
-
 class ServiceModel {
   final int id;
   final String name;

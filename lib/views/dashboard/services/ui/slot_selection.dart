@@ -5,11 +5,10 @@ import 'package:patients/models/models.dart';
 
 class SlotSelectionScreen extends StatelessWidget {
   final ServiceModel service;
-  final TherapistModel therapist;
   final selectedDate = Rx<DateTime>(DateTime.now());
   final selectedSlot = Rx<String?>(null);
 
-  SlotSelectionScreen({super.key, required this.service, required this.therapist});
+  SlotSelectionScreen({super.key, required this.service});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +28,7 @@ class SlotSelectionScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildServiceInfo(), const SizedBox(height: 24), _buildTherapistInfo(), const SizedBox(height: 24), _buildSlotSelection()],
-        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildServiceInfo(), const SizedBox(height: 24), _buildSlotSelection()]),
       ),
       bottomNavigationBar: _buildBookButton(),
     );
@@ -68,36 +64,6 @@ class SlotSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTherapistInfo() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: const Color(0xFF2563EB).withOpacity(0.1),
-            child: const Icon(Icons.person, color: Color(0xFF2563EB)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(therapist.name, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
-                Text(therapist.specialty, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSlotSelection() {
     return Expanded(
       child: Column(
@@ -106,8 +72,7 @@ class SlotSelectionScreen extends StatelessWidget {
           Text('Select Date & Time', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600)),
           const SizedBox(height: 16),
           _buildDateSelector(),
-          const SizedBox(height: 24),
-          _buildTimeSlots(),
+          // date-time set
         ],
       ),
     );
@@ -148,48 +113,6 @@ class SlotSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeSlots() {
-    return Expanded(
-      child: Obx(() {
-        final dayName = _getDayName(selectedDate.value.weekday);
-        final availableSlots = therapist.availability?[dayName] ?? [];
-
-        if (availableSlots.isEmpty) {
-          return Center(
-            child: Text('No slots available for selected date', style: GoogleFonts.poppins(color: Colors.grey[600])),
-          );
-        }
-
-        return GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 2.5),
-          itemCount: availableSlots.length,
-          itemBuilder: (context, index) {
-            final slot = availableSlots[index];
-            return Obx(() {
-              final isSelected = selectedSlot.value == slot;
-              return GestureDetector(
-                onTap: () => selectedSlot.value = slot,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF2563EB) : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: isSelected ? const Color(0xFF2563EB) : Colors.grey[300]!),
-                  ),
-                  child: Center(
-                    child: Text(
-                      slot,
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: isSelected ? Colors.white : Colors.black87),
-                    ),
-                  ),
-                ),
-              );
-            });
-          },
-        );
-      }),
-    );
-  }
-
   Widget _buildBookButton() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -219,7 +142,7 @@ class SlotSelectionScreen extends StatelessWidget {
     Get.close(2);
     Get.snackbar(
       'Booking Confirmed!',
-      '${service.name} booked with ${therapist.name} on ${_formatDate(date)} at $slot',
+      '', // set better message
       backgroundColor: Colors.green,
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
@@ -246,9 +169,5 @@ class SlotSelectionScreen extends StatelessWidget {
       default:
         return 'Monday';
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

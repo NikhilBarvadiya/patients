@@ -9,108 +9,11 @@ class ServicesCtrl extends GetxController {
   var filteredServices = <ServiceModel>[].obs;
   var isLoading = false.obs;
   var searchQuery = ''.obs;
-  var therapists = <TherapistModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchTherapists();
     fetchServices();
-  }
-
-  Future<void> fetchTherapists() async {
-    therapists.value = [
-      TherapistModel(
-        id: '1',
-        name: 'Dr. Sarah Johnson',
-        email: 'sarah.j@example.com',
-        specialty: 'Orthopedic Physiotherapy',
-        experienceYears: 8,
-        clinicName: 'Bone & Joint Care',
-        clinicAddress: '123, Health Street, Surat',
-        rating: 4.8,
-        totalPatients: 120,
-        availability: {
-          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-        },
-      ),
-      TherapistModel(
-        id: '2',
-        name: 'Dr. Mike Wilson',
-        email: 'mike.w@example.com',
-        specialty: 'Neuro Physiotherapy',
-        experienceYears: 12,
-        clinicName: 'Neuro Care Center',
-        clinicAddress: '456, Brain Road, Surat',
-        rating: 4.9,
-        totalPatients: 150,
-        availability: {
-          'Monday': ['10:00 AM', '11:00 AM', '03:00 PM', '04:00 PM'],
-          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Wednesday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
-          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Friday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-        },
-      ),
-      TherapistModel(
-        id: '3',
-        name: 'Dr. Emily Davis',
-        email: 'emily.d@example.com',
-        specialty: 'Sports Medicine',
-        experienceYears: 6,
-        clinicName: 'Sports Therapy Hub',
-        clinicAddress: '789, Fitness Lane, Surat',
-        rating: 4.7,
-        totalPatients: 90,
-        availability: {
-          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Tuesday': ['09:00 AM', '10:00 AM', '03:00 PM', '04:00 PM'],
-          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Thursday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-        },
-      ),
-      TherapistModel(
-        id: '4',
-        name: 'Dr. Anil Sharma',
-        email: 'anil.s@example.com',
-        specialty: 'Pediatric Physiotherapy',
-        experienceYears: 10,
-        clinicName: 'Kids Wellness Clinic',
-        clinicAddress: '101, Child Care Road, Surat',
-        rating: 4.6,
-        totalPatients: 80,
-        availability: {
-          'Monday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
-          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Wednesday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Friday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
-        },
-      ),
-      TherapistModel(
-        id: '5',
-        name: 'Dr. Priya Patel',
-        email: 'priya.p@example.com',
-        specialty: 'Geriatric Physiotherapy',
-        experienceYears: 7,
-        clinicName: 'Senior Care Physio',
-        clinicAddress: '202, Elder Lane, Surat',
-        rating: 4.5,
-        totalPatients: 100,
-        availability: {
-          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Tuesday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
-          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
-          'Thursday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
-        },
-      ),
-    ];
   }
 
   Future<void> fetchServices() async {
@@ -206,11 +109,6 @@ class ServicesCtrl extends GetxController {
   }
 
   void bookService(ServiceModel service) {
-    final therapist = therapists.firstWhereOrNull((t) => t.id == service.therapistId);
-    if (therapist != null) {
-      Get.to(() => SlotSelectionScreen(service: service, therapist: therapist));
-    } else {
-      Get.snackbar('Error', 'Therapist information not available', backgroundColor: Colors.red, colorText: Colors.white);
-    }
+    Get.to(() => SlotSelectionScreen(service: service));
   }
 }
