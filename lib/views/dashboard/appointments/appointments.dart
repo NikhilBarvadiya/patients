@@ -239,15 +239,16 @@ class Appointments extends StatelessWidget {
     double rating = 0.0;
     final commentController = TextEditingController();
     Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return ClipRRect(
-              child: Padding(
+      ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Padding(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: ListView(
+                  shrinkWrap: true,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -345,9 +346,9 @@ class Appointments extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
       barrierDismissible: false,
@@ -553,7 +554,8 @@ class Appointments extends StatelessWidget {
                   ),
                   readOnly: true,
                   onTap: () async {
-                    final DateTime? picked = await showDatePicker(context: Get.context!, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2025));
+                    final DateTime now = DateTime.now();
+                    final DateTime? picked = await showDatePicker(context: Get.context!, initialDate: now, firstDate: now, lastDate: DateTime(now.year + 1, now.month, now.day));
                     if (picked != null) {
                       dateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
                     }

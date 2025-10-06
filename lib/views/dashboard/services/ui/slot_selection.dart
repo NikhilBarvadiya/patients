@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:patients/models/models.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'dart:io';
 
 class SlotSelection extends StatefulWidget {
   final ServiceModel service;
@@ -20,7 +18,6 @@ class _SlotSelectionState extends State<SlotSelection> {
   final timeController = TextEditingController();
   final _razorpay = Razorpay();
   String _selectedPaymentMethod = 'online';
-  File? _paymentScreenshot;
   bool _isProcessing = false;
 
   @override
@@ -70,21 +67,6 @@ class _SlotSelectionState extends State<SlotSelection> {
     }
   }
 
-  Future<void> _pickPaymentScreenshot() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        setState(() {
-          _paymentScreenshot = File(image.path);
-        });
-        Get.snackbar('Success', 'Payment screenshot uploaded', backgroundColor: Colors.green, colorText: Colors.white);
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to pick image: $e', backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
   void _processBooking() {
     if (dateController.text.isEmpty || timeController.text.isEmpty) {
       Get.snackbar('Incomplete Details', 'Please select both date and time', backgroundColor: Colors.orange, colorText: Colors.white);
@@ -95,10 +77,6 @@ class _SlotSelectionState extends State<SlotSelection> {
       setState(() => _isProcessing = true);
       _initiateRazorpayPayment();
     } else {
-      if (_paymentScreenshot == null) {
-        Get.snackbar('Payment Proof Required', 'Please upload payment screenshot for offline payment', backgroundColor: Colors.orange, colorText: Colors.white);
-        return;
-      }
       _confirmBooking(dateController.text, timeController.text, 'OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'pending');
     }
   }
@@ -333,7 +311,7 @@ class _SlotSelectionState extends State<SlotSelection> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildPaymentOption(
-                  title: 'Offline',
+                  title: 'COD',
                   subtitle: 'Pay at clinic',
                   icon: Icons.payments_outlined,
                   isSelected: _selectedPaymentMethod == 'offline',
@@ -342,7 +320,6 @@ class _SlotSelectionState extends State<SlotSelection> {
               ),
             ],
           ),
-          if (_selectedPaymentMethod == 'offline') ...[const SizedBox(height: 20), _buildScreenshotUpload()],
         ],
       ),
     );
@@ -380,48 +357,8 @@ class _SlotSelectionState extends State<SlotSelection> {
     );
   }
 
-  Widget _buildScreenshotUpload() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Upload Payment Proof',
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-        ),
-        const SizedBox(height: 8),
-        Text('Please upload screenshot of your payment for verification', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: _pickPaymentScreenshot,
-          child: Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _paymentScreenshot == null ? Colors.grey[300]! : Colors.green, width: 2),
-            ),
-            child: _paymentScreenshot == null
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_upload_outlined, size: 32, color: Colors.grey[400]),
-                      const SizedBox(height: 8),
-                      Text('Tap to upload screenshot', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                    ],
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(_paymentScreenshot!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBookButton() {
-    final isFormValid = dateController.text.isNotEmpty && timeController.text.isNotEmpty && (_selectedPaymentMethod == 'online' || (_selectedPaymentMethod == 'offline' && _paymentScreenshot != null));
+    final isFormValid = dateController.text.isNotEmpty && timeController.text.isNotEmpty && (_selectedPaymentMethod == 'online' || (_selectedPaymentMethod == 'offline'));
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(

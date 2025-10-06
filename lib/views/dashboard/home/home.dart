@@ -590,7 +590,8 @@ class Home extends StatelessWidget {
                   ),
                   readOnly: true,
                   onTap: () async {
-                    final DateTime? picked = await showDatePicker(context: Get.context!, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2025));
+                    final DateTime now = DateTime.now();
+                    final DateTime? picked = await showDatePicker(context: Get.context!, initialDate: now, firstDate: now, lastDate: DateTime(now.year + 1, now.month, now.day));
                     if (picked != null) {
                       dateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
                     }

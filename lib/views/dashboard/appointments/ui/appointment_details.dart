@@ -289,8 +289,8 @@ class AppointmentDetails extends StatelessWidget {
             return ClipRRect(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: ListView(
+                  shrinkWrap: true,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -474,9 +474,10 @@ class AppointmentDetails extends StatelessWidget {
     final dateController = TextEditingController(text: appointment.date);
     final timeController = TextEditingController(text: appointment.time);
     Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: ClipRRect(
+      ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
