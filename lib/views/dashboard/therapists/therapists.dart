@@ -89,7 +89,7 @@ class Therapists extends StatelessWidget {
   Widget _buildTherapistCard(TherapistModel therapist, TherapistsCtrl ctrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 16, bottom: 16, left: 16, right: 5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

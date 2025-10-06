@@ -40,7 +40,7 @@ class Services extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: EdgeInsets.only(left: 20, right: 20, top: 18),
               child: Column(
                 children: [
                   TextField(
@@ -160,7 +160,7 @@ class Services extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
-              onPressed: () => ctrl.bookService(service.id.toString(), service.therapistId),
+              onPressed: () => ctrl.bookDetails(service),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF2563EB),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

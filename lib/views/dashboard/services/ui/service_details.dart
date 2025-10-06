@@ -172,10 +172,6 @@ class ServiceDetails extends StatelessWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Get.toNamed('/therapist-details', arguments: therapist.id),
-                  icon: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
-                ),
               ],
             )
           else
@@ -220,7 +216,7 @@ class ServiceDetails extends StatelessWidget {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () => ctrl.bookService(service.id.toString(), service.therapistId),
+            onPressed: () => ctrl.bookService(service),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF2563EB),
               padding: const EdgeInsets.symmetric(vertical: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:patients/models/models.dart';
 import 'package:patients/views/dashboard/services/ui/service_details.dart';
+import 'package:patients/views/dashboard/services/ui/slot_selection.dart';
 
 class ServicesCtrl extends GetxController {
   var services = <ServiceModel>[].obs;
@@ -29,6 +30,13 @@ class ServicesCtrl extends GetxController {
         clinicAddress: '123, Health Street, Surat',
         rating: 4.8,
         totalPatients: 120,
+        availability: {
+          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+        },
       ),
       TherapistModel(
         id: '2',
@@ -40,6 +48,13 @@ class ServicesCtrl extends GetxController {
         clinicAddress: '456, Brain Road, Surat',
         rating: 4.9,
         totalPatients: 150,
+        availability: {
+          'Monday': ['10:00 AM', '11:00 AM', '03:00 PM', '04:00 PM'],
+          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Wednesday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
+          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Friday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+        },
       ),
       TherapistModel(
         id: '3',
@@ -51,6 +66,13 @@ class ServicesCtrl extends GetxController {
         clinicAddress: '789, Fitness Lane, Surat',
         rating: 4.7,
         totalPatients: 90,
+        availability: {
+          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Tuesday': ['09:00 AM', '10:00 AM', '03:00 PM', '04:00 PM'],
+          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Thursday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+        },
       ),
       TherapistModel(
         id: '4',
@@ -62,6 +84,13 @@ class ServicesCtrl extends GetxController {
         clinicAddress: '101, Child Care Road, Surat',
         rating: 4.6,
         totalPatients: 80,
+        availability: {
+          'Monday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
+          'Tuesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Wednesday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Thursday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Friday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
+        },
       ),
       TherapistModel(
         id: '5',
@@ -73,6 +102,13 @@ class ServicesCtrl extends GetxController {
         clinicAddress: '202, Elder Lane, Surat',
         rating: 4.5,
         totalPatients: 100,
+        availability: {
+          'Monday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Tuesday': ['09:00 AM', '10:00 AM', '02:00 PM', '03:00 PM'],
+          'Wednesday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+          'Thursday': ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+          'Friday': ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM'],
+        },
       ),
     ];
   }
@@ -90,6 +126,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '1',
         therapistName: 'Dr. Sarah Johnson',
         price: 1200.0,
+        duration: '45 mins',
       ),
       ServiceModel(
         id: 2,
@@ -100,6 +137,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '2',
         therapistName: 'Dr. Mike Wilson',
         price: 1500.0,
+        duration: '60 mins',
       ),
       ServiceModel(
         id: 3,
@@ -110,6 +148,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '3',
         therapistName: 'Dr. Emily Davis',
         price: 1300.0,
+        duration: '45 mins',
       ),
       ServiceModel(
         id: 4,
@@ -120,6 +159,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '4',
         therapistName: 'Dr. Anil Sharma',
         price: 1100.0,
+        duration: '30 mins',
       ),
       ServiceModel(
         id: 5,
@@ -130,6 +170,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '5',
         therapistName: 'Dr. Priya Patel',
         price: 1000.0,
+        duration: '45 mins',
       ),
       ServiceModel(
         id: 6,
@@ -140,6 +181,7 @@ class ServicesCtrl extends GetxController {
         therapistId: '1',
         therapistName: 'Dr. Sarah Johnson',
         price: 1400.0,
+        duration: '30 mins',
       ),
     ];
     applyFilters();
@@ -180,11 +222,16 @@ class ServicesCtrl extends GetxController {
         .name;
   }
 
-  void viewServiceDetails(ServiceModel service) {
+  void bookDetails(ServiceModel service) {
     Get.to(() => ServiceDetails(service: service));
   }
 
-  void bookService(String serviceId, String therapistId) {
-    Get.toNamed('/book-clinic', arguments: {'serviceId': serviceId, 'therapistId': therapistId});
+  void bookService(ServiceModel service) {
+    final therapist = therapists.firstWhereOrNull((t) => t.id == service.therapistId);
+    if (therapist != null) {
+      Get.to(() => SlotSelectionScreen(service: service, therapist: therapist));
+    } else {
+      Get.snackbar('Error', 'Therapist information not available', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 }

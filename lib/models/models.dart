@@ -20,8 +20,9 @@ class TherapistModel {
   final String clinicName;
   final String clinicAddress;
   final double rating;
-  final String? image;
   final int totalPatients;
+  final String? image;
+  final Map<String, List<String>>? availability;
 
   TherapistModel({
     required this.id,
@@ -32,8 +33,33 @@ class TherapistModel {
     required this.clinicName,
     required this.clinicAddress,
     required this.rating,
-    this.image,
     required this.totalPatients,
+    this.image,
+    this.availability,
+  });
+}
+
+class ServiceModel {
+  final int id;
+  final String name;
+  final String description;
+  final IconData icon;
+  bool isActive;
+  final String therapistId;
+  final String therapistName;
+  final double price;
+  final String duration;
+
+  ServiceModel({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.isActive,
+    required this.therapistId,
+    required this.therapistName,
+    required this.price,
+    required this.duration,
   });
 }
 
@@ -103,26 +129,4 @@ class PatientRequestModel {
       price: price ?? this.price,
     );
   }
-}
-
-class ServiceModel {
-  final int id;
-  final String name;
-  final String description;
-  final IconData icon;
-  final bool isActive;
-  final String therapistId;
-  final String therapistName;
-  final double price;
-
-  ServiceModel({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.icon,
-    required this.isActive,
-    required this.therapistId,
-    required this.therapistName,
-    required this.price,
-  });
 }

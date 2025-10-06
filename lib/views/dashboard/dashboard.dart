@@ -28,24 +28,27 @@ class _DashboardState extends State<Dashboard> {
       init: DashboardCtrl(),
       builder: (ctrl) {
         return Obx(() {
-          return Scaffold(
-            backgroundColor: Colors.grey[50],
-            body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Appointments(), Profile()]),
-            bottomNavigationBar: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -2))],
-              ),
-              child: BottomNavigationBar(
-                currentIndex: ctrl.currentIndex.value,
-                onTap: ctrl.changeTab,
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                selectedItemColor: const Color(0xFF2563EB),
-                unselectedItemColor: const Color(0xFF6B7280),
-                selectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
-                unselectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
-                items: _navItems,
+          return PopScope(
+            canPop: false,
+            child: Scaffold(
+              backgroundColor: Colors.grey[50],
+              body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Appointments(), Profile()]),
+              bottomNavigationBar: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -2))],
+                ),
+                child: BottomNavigationBar(
+                  currentIndex: ctrl.currentIndex.value,
+                  onTap: ctrl.changeTab,
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.white,
+                  selectedItemColor: const Color(0xFF2563EB),
+                  unselectedItemColor: const Color(0xFF6B7280),
+                  selectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+                  unselectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+                  items: _navItems,
+                ),
               ),
             ),
           );
