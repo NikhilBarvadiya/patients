@@ -119,6 +119,8 @@ class Register extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      _buildLocationStatus(ctrl),
+                      const SizedBox(height: 16),
                       Obx(
                         () => SizedBox(
                           height: 52,
@@ -178,6 +180,73 @@ class Register extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLocationStatus(RegisterCtrl ctrl) {
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: ctrl.locationStatus.value.contains('successfully')
+              ? const Color(0xFFD1FAE5)
+              : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
+              ? const Color(0xFFFEE2E2)
+              : const Color(0xFFFEF3C7),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: ctrl.locationStatus.value.contains('successfully')
+                ? const Color(0xFF10B981)
+                : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
+                ? const Color(0xFFEF4444)
+                : const Color(0xFFF59E0B),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              ctrl.locationStatus.value.contains('successfully')
+                  ? Icons.check_circle_rounded
+                  : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
+                  ? Icons.error_outline_rounded
+                  : Icons.location_searching_rounded,
+              color: ctrl.locationStatus.value.contains('successfully')
+                  ? const Color(0xFF10B981)
+                  : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
+                  ? const Color(0xFFEF4444)
+                  : const Color(0xFFF59E0B),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ctrl.isGettingLocation.value ? 'Getting Location...' : 'Location Status',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    ctrl.locationStatus.value,
+                    style: TextStyle(fontSize: 11, color: const Color(0xFF6B7280), fontWeight: ctrl.locationStatus.value.contains('successfully') ? FontWeight.w600 : FontWeight.normal),
+                  ),
+                ],
+              ),
+            ),
+            if (ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied'))
+              TextButton(
+                onPressed: ctrl.retryLocation,
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
+                child: const Text(
+                  'Retry',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2563EB)),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
