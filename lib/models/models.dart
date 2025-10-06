@@ -19,22 +19,44 @@ class ServiceModel {
   final String description;
   final IconData icon;
   bool isActive;
-  final String therapistId;
-  final String therapistName;
   final double price;
-  final String duration;
 
-  ServiceModel({
+  ServiceModel({required this.id, required this.name, required this.description, required this.icon, required this.isActive, required this.price});
+}
+
+class ReviewModel {
+  final String id;
+  final String appointmentId;
+  final String patientId;
+  final String therapistId;
+  final double rating;
+  final String comment;
+  final DateTime createdAt;
+  final String? patientName;
+
+  ReviewModel({
     required this.id,
-    required this.name,
-    required this.description,
-    required this.icon,
-    required this.isActive,
+    required this.appointmentId,
+    required this.patientId,
     required this.therapistId,
-    required this.therapistName,
-    required this.price,
-    required this.duration,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+    this.patientName,
   });
+
+  ReviewModel copyWith({double? rating, String? comment}) {
+    return ReviewModel(
+      id: id,
+      appointmentId: appointmentId,
+      patientId: patientId,
+      therapistId: therapistId,
+      rating: rating ?? this.rating,
+      comment: comment ?? this.comment,
+      createdAt: createdAt,
+      patientName: patientName,
+    );
+  }
 }
 
 class PatientRequestModel {
@@ -52,6 +74,7 @@ class PatientRequestModel {
   final String therapistImage;
   final String duration;
   final double price;
+  final ReviewModel? review;
 
   PatientRequestModel({
     required this.id,
@@ -68,6 +91,7 @@ class PatientRequestModel {
     required this.therapistImage,
     required this.duration,
     required this.price,
+    this.review,
   });
 
   PatientRequestModel copyWith({
@@ -85,6 +109,7 @@ class PatientRequestModel {
     String? therapistImage,
     String? duration,
     double? price,
+    ReviewModel? review,
   }) {
     return PatientRequestModel(
       id: id ?? this.id,
@@ -101,6 +126,23 @@ class PatientRequestModel {
       therapistImage: therapistImage ?? this.therapistImage,
       duration: duration ?? this.duration,
       price: price ?? this.price,
+      review: review ?? this.review,
     );
+  }
+}
+
+class NotificationModel {
+  final String id;
+  final String title;
+  final String message;
+  final String type;
+  final DateTime createdAt;
+  final bool isRead;
+  final Map<String, dynamic>? data;
+
+  NotificationModel({required this.id, required this.title, required this.message, required this.type, required this.createdAt, this.isRead = false, this.data});
+
+  NotificationModel copyWith({bool? isRead}) {
+    return NotificationModel(id: id, title: title, message: message, type: type, createdAt: createdAt, isRead: isRead ?? this.isRead, data: data);
   }
 }

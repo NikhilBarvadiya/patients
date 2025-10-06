@@ -20,72 +20,12 @@ class ServicesCtrl extends GetxController {
     isLoading.value = true;
     await Future.delayed(Duration(seconds: 1));
     services.value = [
-      ServiceModel(
-        id: 1,
-        name: 'Ortho Therapy',
-        description: 'Comprehensive rehabilitation for joint and muscle injuries.',
-        icon: Icons.fitness_center,
-        isActive: true,
-        therapistId: '1',
-        therapistName: 'Dr. Sarah Johnson',
-        price: 1200.0,
-        duration: '45 mins',
-      ),
-      ServiceModel(
-        id: 2,
-        name: 'Neuro Therapy',
-        description: 'Specialized therapy for neurological conditions.',
-        icon: Icons.psychology,
-        isActive: true,
-        therapistId: '2',
-        therapistName: 'Dr. Mike Wilson',
-        price: 1500.0,
-        duration: '60 mins',
-      ),
-      ServiceModel(
-        id: 3,
-        name: 'Sports Therapy',
-        description: 'Tailored recovery programs for athletes.',
-        icon: Icons.sports_tennis,
-        isActive: true,
-        therapistId: '3',
-        therapistName: 'Dr. Emily Davis',
-        price: 1300.0,
-        duration: '45 mins',
-      ),
-      ServiceModel(
-        id: 4,
-        name: 'Pediatric Therapy',
-        description: 'Therapy for children to support developmental milestones.',
-        icon: Icons.child_care,
-        isActive: true,
-        therapistId: '4',
-        therapistName: 'Dr. Anil Sharma',
-        price: 1100.0,
-        duration: '30 mins',
-      ),
-      ServiceModel(
-        id: 5,
-        name: 'Geriatric Therapy',
-        description: 'Gentle therapy for elderly patients to improve mobility.',
-        icon: Icons.elderly,
-        isActive: true,
-        therapistId: '5',
-        therapistName: 'Dr. Priya Patel',
-        price: 1000.0,
-        duration: '45 mins',
-      ),
-      ServiceModel(
-        id: 6,
-        name: 'Pain Management',
-        description: 'Advanced techniques to alleviate chronic pain.',
-        icon: Icons.healing,
-        isActive: false,
-        therapistId: '1',
-        therapistName: 'Dr. Sarah Johnson',
-        price: 1400.0,
-        duration: '30 mins',
-      ),
+      ServiceModel(id: 1, name: 'Ortho Therapy', description: 'Comprehensive rehabilitation for joint and muscle injuries.', icon: Icons.fitness_center, isActive: true, price: 1200.0),
+      ServiceModel(id: 2, name: 'Neuro Therapy', description: 'Specialized therapy for neurological conditions.', icon: Icons.psychology, isActive: true, price: 1500.0),
+      ServiceModel(id: 3, name: 'Sports Therapy', description: 'Tailored recovery programs for athletes.', icon: Icons.sports_tennis, isActive: true, price: 1300.0),
+      ServiceModel(id: 4, name: 'Pediatric Therapy', description: 'Therapy for children to support developmental milestones.', icon: Icons.child_care, isActive: true, price: 1100.0),
+      ServiceModel(id: 5, name: 'Geriatric Therapy', description: 'Gentle therapy for elderly patients to improve mobility.', icon: Icons.elderly, isActive: true, price: 1000.0),
+      ServiceModel(id: 6, name: 'Pain Management', description: 'Advanced techniques to alleviate chronic pain.', icon: Icons.healing, isActive: false, price: 1400.0),
     ];
     applyFilters();
     isLoading.value = false;
@@ -109,6 +49,6 @@ class ServicesCtrl extends GetxController {
   }
 
   void bookService(ServiceModel service) {
-    Get.to(() => SlotSelectionScreen(service: service));
+    Get.to(() => SlotSelection(service: service));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:patients/views/dashboard/appointments/appointments.dart';
@@ -30,6 +31,14 @@ class _DashboardState extends State<Dashboard> {
         return Obx(() {
           return PopScope(
             canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              if (ctrl.currentIndex.value != 0) {
+                ctrl.changeTab(ctrl.currentIndex.value - 1);
+                return;
+              }
+              _showExitConfirmationDialog(context, ctrl);
+            },
             child: Scaffold(
               backgroundColor: Colors.grey[50],
               body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Appointments(), Profile()]),
@@ -54,6 +63,39 @@ class _DashboardState extends State<Dashboard> {
           );
         });
       },
+    );
+  }
+
+  void _showExitConfirmationDialog(BuildContext context, DashboardCtrl ctrl) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.exit_to_app, color: Color(0xFFEF4444)),
+            SizedBox(width: 8),
+            Text('Exit App'),
+          ],
+        ),
+        content: const Text('Are you sure you want to exit the app?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              SystemNavigator.pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.only(top: 2, bottom: 2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Exit', style: TextStyle(fontSize: 13, letterSpacing: .5)),
+          ),
+        ],
+      ),
     );
   }
 }

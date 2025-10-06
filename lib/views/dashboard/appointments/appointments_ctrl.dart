@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:patients/models/models.dart';
 import 'package:patients/views/dashboard/appointments/ui/appointment_details.dart';
@@ -11,33 +12,43 @@ class AppointmentsCtrl extends GetxController {
       id: '1',
       patientId: '1',
       therapistId: '1',
-      serviceName: 'Ortho Therapy',
+      serviceName: 'Orthopedic Therapy',
       serviceId: '1',
       date: '2024-01-15',
       time: '10:00 AM',
-      status: 'confirmed',
+      status: 'completed',
       patientNotes: 'Regular checkup for shoulder pain',
       requestedAt: DateTime.now().subtract(Duration(days: 2)),
       therapistName: 'Dr. Sarah Johnson',
-      therapistImage: '',
+      therapistImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
       duration: '45 mins',
-      price: 1200.0,
+      price: 1500.0,
+      review: ReviewModel(
+        id: 'rev1',
+        appointmentId: '1',
+        patientId: '1',
+        therapistId: '1',
+        rating: 4.5,
+        comment: 'Dr. Sarah was very professional and helped me with my shoulder pain effectively.',
+        createdAt: DateTime.now().subtract(Duration(days: 1)),
+        patientName: 'John Doe',
+      ),
     ),
     PatientRequestModel(
       id: '2',
       patientId: '1',
       therapistId: '2',
-      serviceName: 'Neuro Therapy',
+      serviceName: 'Neuro Rehabilitation',
       serviceId: '2',
       date: '2024-01-18',
       time: '02:30 PM',
-      status: 'pending',
+      status: 'completed',
       patientNotes: 'First session for coordination issues',
       requestedAt: DateTime.now().subtract(Duration(days: 1)),
       therapistName: 'Dr. Mike Wilson',
-      therapistImage: '',
+      therapistImage: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150',
       duration: '60 mins',
-      price: 1500.0,
+      price: 2000.0,
     ),
     PatientRequestModel(
       id: '3',
@@ -51,9 +62,19 @@ class AppointmentsCtrl extends GetxController {
       patientNotes: 'Ankle injury recovery session',
       requestedAt: DateTime.now().subtract(Duration(days: 5)),
       therapistName: 'Dr. Emily Davis',
-      therapistImage: '',
+      therapistImage: 'https://images.unsplash.com/photo-1594824947933-d0501ba2fe65?w=150',
       duration: '45 mins',
       price: 1800.0,
+      review: ReviewModel(
+        id: 'rev3',
+        appointmentId: '3',
+        patientId: '1',
+        therapistId: '3',
+        rating: 5.0,
+        comment: 'Excellent service! My ankle feels much better after just one session.',
+        createdAt: DateTime.now().subtract(Duration(days: 4)),
+        patientName: 'John Doe',
+      ),
     ),
     PatientRequestModel(
       id: '4',
@@ -67,7 +88,7 @@ class AppointmentsCtrl extends GetxController {
       patientNotes: 'Back pain treatment',
       requestedAt: DateTime.now().subtract(Duration(days: 3)),
       therapistName: 'Dr. Sarah Johnson',
-      therapistImage: '',
+      therapistImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
       duration: '30 mins',
       price: 1000.0,
     ),
@@ -83,7 +104,7 @@ class AppointmentsCtrl extends GetxController {
       patientNotes: 'Follow-up session',
       requestedAt: DateTime.now().subtract(Duration(hours: 12)),
       therapistName: 'Dr. Mike Wilson',
-      therapistImage: '',
+      therapistImage: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150',
       duration: '60 mins',
       price: 1500.0,
     ),
@@ -112,6 +133,35 @@ class AppointmentsCtrl extends GetxController {
     final index = appointments.indexWhere((app) => app.id == appointmentId);
     appointments[index] = appointment.copyWith(date: newDate, time: newTime, status: 'pending');
     update();
+  }
+
+  void addReview(String appointmentId, double rating, String comment) {
+    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
+    final index = appointments.indexWhere((app) => app.id == appointmentId);
+    final review = ReviewModel(
+      id: 'rev_${DateTime.now().millisecondsSinceEpoch}',
+      appointmentId: appointmentId,
+      patientId: appointment.patientId,
+      therapistId: appointment.therapistId,
+      rating: rating,
+      comment: comment,
+      createdAt: DateTime.now(),
+      patientName: 'You',
+    );
+    appointments[index] = appointment.copyWith(review: review);
+    update();
+    Get.snackbar('Review Submitted!', 'Thank you for your feedback', backgroundColor: Color(0xFF10B981), colorText: Colors.white);
+  }
+
+  void updateReview(String appointmentId, double rating, String comment) {
+    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
+    final index = appointments.indexWhere((app) => app.id == appointmentId);
+    if (appointment.review != null) {
+      final updatedReview = appointment.review!.copyWith(rating: rating, comment: comment);
+      appointments[index] = appointment.copyWith(review: updatedReview);
+      update();
+      Get.snackbar('Review Updated!', 'Your feedback has been updated', backgroundColor: Color(0xFF10B981), colorText: Colors.white);
+    }
   }
 
   void viewAppointmentDetails(String appointmentId) {

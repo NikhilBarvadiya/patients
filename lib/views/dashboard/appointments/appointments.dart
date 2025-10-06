@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:patients/models/models.dart';
@@ -56,7 +57,7 @@ class Appointments extends StatelessWidget {
       height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.only(right: 8),
+        itemCount: ctrl.filters.length,
         itemBuilder: (context, index) {
           final filter = ctrl.filters[index];
           return Obx(
@@ -67,7 +68,7 @@ class Appointments extends StatelessWidget {
               selectedColor: Color(0xFF2563EB),
               checkmarkColor: Colors.white,
               labelStyle: GoogleFonts.poppins(color: ctrl.selectedFilter.value == filter ? Colors.white : Colors.grey[700], fontWeight: FontWeight.w500),
-              backgroundColor: Colors.grey[100],
+              backgroundColor: Colors.white,
             ).paddingOnly(right: 8),
           );
         },
@@ -78,7 +79,6 @@ class Appointments extends StatelessWidget {
   Widget _buildAppointmentCard(PatientRequestModel appointment) {
     final statusColor = _getStatusColor(appointment.status);
     final statusIcon = _getStatusIcon(appointment.status);
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -129,6 +129,7 @@ class Appointments extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _buildDetailRow(appointment),
+                if (appointment.status == 'completed') ...[const SizedBox(height: 12), _buildReviewSection(appointment)],
                 if (appointment.status == 'pending' || appointment.status == 'confirmed') ...[
                   const SizedBox(height: 12),
                   Divider(color: Colors.grey[200]),
@@ -167,6 +168,189 @@ class Appointments extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildReviewSection(PatientRequestModel appointment) {
+    final hasReview = appointment.review != null;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: hasReview ? Color(0xFF10B981).withOpacity(0.05) : Color(0xFFF59E0B).withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: hasReview ? Color(0xFF10B981).withOpacity(0.2) : Color(0xFFF59E0B).withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasReview ? 'You reviewed this session' : 'Rate your experience',
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: hasReview ? Color(0xFF10B981) : Color(0xFFF59E0B)),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    _buildStarRating(appointment.review?.rating ?? 0.0),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        appointment.review?.comment ?? "",
+                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (!hasReview) ...[
+            ElevatedButton(
+              onPressed: () => _showAddReviewDialog(appointment.id),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text('Add Review', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStarRating(double rating) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        return Icon(index < rating.floor() ? Icons.star_rounded : (index < rating.ceil() ? Icons.star_half_rounded : Icons.star_outline_rounded), color: Color(0xFFF59E0B), size: 14);
+      }),
+    );
+  }
+
+  void _showAddReviewDialog(String appointmentId) {
+    final appointment = ctrl.appointments.firstWhere((appt) => appt.id == appointmentId);
+    double rating = 0.0;
+    final commentController = TextEditingController();
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return ClipRRect(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
+                      child: Icon(Icons.star_rounded, color: Color(0xFF2563EB), size: 40),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Rate Your Experience',
+                      style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'How was your session with ${appointment.therapistName}?',
+                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Tap to rate', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: RatingStars(
+                        axis: Axis.horizontal,
+                        value: rating,
+                        onValueChanged: (v) => setState(() => rating = v),
+                        starCount: 5,
+                        starSize: 20,
+                        valueLabelColor: const Color(0xff9b9b9b),
+                        valueLabelTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontStyle: FontStyle.normal, fontSize: 12.0),
+                        valueLabelRadius: 10,
+                        maxValue: 5,
+                        starSpacing: 10,
+                        maxValueVisibility: true,
+                        valueLabelVisibility: true,
+                        animationDuration: Duration(milliseconds: 1000),
+                        valueLabelPadding: const EdgeInsets.symmetric(vertical: 1, horizontal: 8),
+                        valueLabelMargin: const EdgeInsets.only(right: 8),
+                        starOffColor: const Color(0xffe7e8ea),
+                        starColor: Color(0xFFF59E0B),
+                        angle: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: commentController,
+                      minLines: 1,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Your Review (Optional)',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Get.back(),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: Text('Cancel', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: rating > 0
+                                ? () {
+                                    ctrl.addReview(appointmentId, rating, commentController.text);
+                                    Get.back();
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF2563EB),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: Text(
+                              'Submit Review',
+                              style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      barrierDismissible: false,
     );
   }
 
@@ -292,7 +476,7 @@ class Appointments extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: Text('Keep', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      child: Text('Keep', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -316,7 +500,7 @@ class Appointments extends StatelessWidget {
                       ),
                       child: Text(
                         'Cancel',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 12),
                       ),
                     ),
                   ),
@@ -350,7 +534,7 @@ class Appointments extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Reschedule Appointment',
+                  'Appointment',
                   style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                 ),
                 const SizedBox(height: 8),
@@ -401,7 +585,7 @@ class Appointments extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: Text('Cancel', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                        child: Text('Cancel', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -427,7 +611,7 @@ class Appointments extends StatelessWidget {
                         ),
                         child: Text(
                           'Reschedule',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white),
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ),

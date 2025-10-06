@@ -41,13 +41,7 @@ class ServiceDetails extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildServiceHeaderCard(service),
-                  const SizedBox(height: 24),
-                  _buildDetailsSection(service),
-                  const SizedBox(height: 24),
-                  _buildActionButtons(service, ctrl),
-                ],
+                children: [_buildServiceHeaderCard(service), const SizedBox(height: 24), _buildDetailsSection(service), const SizedBox(height: 24), _buildActionButtons(service, ctrl)],
               ),
             ),
           ),
@@ -160,7 +154,7 @@ class ServiceDetails extends StatelessWidget {
             ),
             child: Text(
               'Book Now',
-              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
             ),
           ),
         ),
@@ -175,7 +169,7 @@ class ServiceDetails extends StatelessWidget {
             ),
             child: Text(
               'Back to Services',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.grey[700]),
+              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey[700]),
             ),
           ),
         ),
