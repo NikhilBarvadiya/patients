@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:patients/models/models.dart';
 import 'package:patients/views/dashboard/home/home_ctrl.dart';
 import 'package:patients/views/dashboard/home/notifications/notifications.dart';
+import 'package:patients/views/dashboard/services/ui/service_card.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
@@ -76,7 +77,7 @@ class Home extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _buildRegularServices(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 5),
               _buildPendingAppointments(),
             ],
           ),
@@ -169,25 +170,13 @@ class Home extends StatelessWidget {
 
   Widget _buildRegularServices() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Regular Services',
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: ctrl.viewAllAppointments,
-                child: Text(
-                  'View All',
-                  style: GoogleFonts.poppins(color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
+          Text(
+            'Regular Services',
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
           ),
           const SizedBox(height: 12),
           Obx(() {
@@ -195,99 +184,18 @@ class Home extends StatelessWidget {
               return _buildEmptyState('No regular appointments', 'Book your first session to get started', Icons.calendar_today_outlined);
             }
             return SizedBox(
-              height: 200,
+              height: 155,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
                 itemCount: ctrl.regularServices.length > 5 ? 5 : ctrl.regularServices.length,
                 itemBuilder: (context, index) {
-                  return _buildServiceCard(ctrl.regularServices[index]);
+                  return ServiceCard(width: Get.width - 60, margin: const EdgeInsets.only(right: 15), service: ctrl.regularServices[index]);
                 },
               ),
             );
           }),
         ],
-      ),
-    );
-  }
-
-  Widget _buildServiceCard(ServiceModel service) {
-    return Container(
-      width: 300,
-      margin: const EdgeInsets.only(right: 12),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        elevation: 2,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => ctrl.bookDetails(service),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Icon(service.icon, color: const Color(0xFF2563EB), size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            service.name,
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-                          ),
-                          Text(
-                            '₹${service.price.toStringAsFixed(0)}',
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF2563EB)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(service.description, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700], letterSpacing: .5)),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => ctrl.bookDetails(service),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF2563EB),
-                          side: const BorderSide(color: Color(0xFF2563EB)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text('View Details', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => ctrl.bookService(service),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text('Book Now', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12)),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -423,6 +331,7 @@ class Home extends StatelessWidget {
 
   Widget _buildEmptyState(String title, String subtitle, IconData icon) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,

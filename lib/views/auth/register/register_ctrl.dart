@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:patients/utils/config/session.dart';
 import 'package:patients/utils/routes/route_name.dart';
-import 'package:patients/utils/storage.dart';
 import 'package:patients/utils/toaster.dart';
+import 'package:patients/views/auth/auth_service.dart';
 
 class RegisterCtrl extends GetxController {
   final nameCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final mobileCtrl = TextEditingController();
-  final cityCtrl = TextEditingController();
-  final stateCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
   var isLoading = false.obs, isPasswordVisible = false.obs, isGettingLocation = false.obs;
-  var coordinates = '["0.0", "0.0"]'.obs, locationStatus = 'Fetching location...'.obs;
+  var coordinates = [0.0, 0.0].obs, locationStatus = 'Fetching location...'.obs;
+
+  AuthService get authService => Get.find<AuthService>();
 
   void togglePasswordVisibility() => isPasswordVisible.toggle();
 
@@ -32,8 +31,6 @@ class RegisterCtrl extends GetxController {
     emailCtrl.dispose();
     passwordCtrl.dispose();
     mobileCtrl.dispose();
-    cityCtrl.dispose();
-    stateCtrl.dispose();
     addressCtrl.dispose();
     super.onClose();
   }
@@ -69,7 +66,7 @@ class RegisterCtrl extends GetxController {
       }
       locationStatus.value = 'Getting your location...';
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 15));
-      coordinates.value = '["${position.latitude}", "${position.longitude}"]';
+      coordinates.value = [position.latitude, position.longitude];
       locationStatus.value = 'Location fetched successfully!';
     } catch (e) {
       locationStatus.value = 'Failed to get location';
@@ -79,9 +76,7 @@ class RegisterCtrl extends GetxController {
     }
   }
 
-  Future<void> retryLocation() async {
-    await _fetchCurrentLocation();
-  }
+  Future<void> retryLocation() async => await _fetchCurrentLocation();
 
   Future<void> register() async {
     if (!_validateForm()) return;
@@ -92,21 +87,18 @@ class RegisterCtrl extends GetxController {
         'email': emailCtrl.text.trim(),
         'password': passwordCtrl.text.trim(),
         'mobile': mobileCtrl.text.trim(),
-        'city': cityCtrl.text.trim(),
-        'state': stateCtrl.text.trim(),
-        'coordinates': coordinates.value,
+        'coordinates': coordinates,
         'address': addressCtrl.text.trim(),
-        'createdAt': DateTime.now().toIso8601String(),
       };
-      await Future.delayed(const Duration(seconds: 2));
-      await write(AppSession.token, 'patient_token_${DateTime.now().millisecondsSinceEpoch}');
-      await write(AppSession.userData, request);
-      toaster.success("Welcome to HealSync! Your account has been created successfully.");
-      _clearForm();
-      Get.offAllNamed(AppRouteNames.dashboard);
+      await authService.register(request);
     } catch (e) {
       toaster.error("Registration failed: ${e.toString()}");
     } finally {
+      nameCtrl.clear();
+      emailCtrl.clear();
+      passwordCtrl.clear();
+      mobileCtrl.clear();
+      addressCtrl.clear();
       isLoading.value = false;
     }
   }
@@ -140,29 +132,11 @@ class RegisterCtrl extends GetxController {
       toaster.warning('Please enter a valid 10-digit mobile number');
       return false;
     }
-    if (cityCtrl.text.isEmpty) {
-      toaster.warning('Please enter your city');
-      return false;
-    }
-    if (stateCtrl.text.isEmpty) {
-      toaster.warning('Please enter your state');
-      return false;
-    }
     if (addressCtrl.text.isEmpty) {
       toaster.warning('Please enter your address');
       return false;
     }
     return true;
-  }
-
-  void _clearForm() {
-    nameCtrl.clear();
-    emailCtrl.clear();
-    passwordCtrl.clear();
-    mobileCtrl.clear();
-    cityCtrl.clear();
-    stateCtrl.clear();
-    addressCtrl.clear();
   }
 
   void goToLogin() => Get.toNamed(AppRouteNames.login);

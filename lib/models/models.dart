@@ -1,28 +1,3 @@
-import 'package:flutter/material.dart';
-
-class PatientModel {
-  final String id;
-  final String name;
-  final String email;
-  final String mobile;
-  final String password;
-  final String city;
-  final String state;
-  final String address;
-
-  PatientModel({required this.id, required this.name, required this.email, required this.mobile, required this.password, required this.city, required this.state, required this.address});
-}
-
-class ServiceModel {
-  final int id;
-  final String name;
-  final String description;
-  final IconData icon;
-  bool isActive;
-  final double price;
-
-  ServiceModel({required this.id, required this.name, required this.description, required this.icon, required this.isActive, required this.price});
-}
 
 class ReviewModel {
   final String id;

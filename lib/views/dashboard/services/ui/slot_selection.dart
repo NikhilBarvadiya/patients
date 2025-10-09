@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:patients/models/models.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../models/service_model.dart';
 
 class SlotSelection extends StatefulWidget {
   final ServiceModel service;
@@ -51,7 +51,7 @@ class _SlotSelectionState extends State<SlotSelection> {
   Future<void> _initiateRazorpayPayment() async {
     final options = {
       'key': 'rzp_test_RHRLTvT4Rm3WOP',
-      'amount': (widget.service.price * 100).toInt(),
+      'amount': (widget.service.charge! * 100).toInt(),
       'name': 'PhysioCare Clinic',
       'description': widget.service.name,
       'prefill': {'contact': '9876543210', 'email': 'patient@example.com'},
@@ -173,7 +173,7 @@ class _SlotSelectionState extends State<SlotSelection> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '₹${widget.service.price.toStringAsFixed(0)}',
+                  '₹${widget.service.charge!.toStringAsFixed(0)}',
                   style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
                 ),
               ],
@@ -376,7 +376,7 @@ class _SlotSelectionState extends State<SlotSelection> {
               children: [
                 Text('Total Amount', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
                 Text(
-                  '₹${widget.service.price.toStringAsFixed(0)}',
+                  '₹${widget.service.charge!.toStringAsFixed(0)}',
                   style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
                 ),
               ],

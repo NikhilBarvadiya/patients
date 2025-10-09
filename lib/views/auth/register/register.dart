@@ -67,32 +67,6 @@ class Register extends StatelessWidget {
                       const SizedBox(height: 8),
                       _buildTextField(controller: ctrl.mobileCtrl, hint: 'Enter your mobile number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone, maxLength: 10),
                       const SizedBox(height: 16),
-                      Row(
-                        spacing: 10.0,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(context, 'City'),
-                                const SizedBox(height: 8),
-                                _buildTextField(controller: ctrl.cityCtrl, hint: 'Enter your city', icon: Icons.location_city_rounded),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(context, 'State'),
-                                const SizedBox(height: 8),
-                                _buildTextField(controller: ctrl.stateCtrl, hint: 'Enter your state', icon: Icons.location_city_rounded),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
                       _buildLabel(context, 'Address'),
                       const SizedBox(height: 8),
                       _buildTextField(controller: ctrl.addressCtrl, hint: 'Enter your address', icon: Icons.home_outlined, maxLines: 2),
@@ -274,6 +248,7 @@ class Register extends StatelessWidget {
       obscureText: obscureText,
       maxLength: maxLength,
       maxLines: maxLines,
+      minLines: 1,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 20, color: decoration.colorScheme.primary),

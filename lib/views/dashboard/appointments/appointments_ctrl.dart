@@ -1,170 +1,156 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:patients/models/models.dart';
+import 'package:patients/utils/toaster.dart';
+import 'package:patients/views/auth/auth_service.dart';
 import 'package:patients/views/dashboard/appointments/ui/appointment_details.dart';
+import '../../../models/patient_request_model.dart';
 
 class AppointmentsCtrl extends GetxController {
+  final AuthService _authService = Get.find<AuthService>();
   var selectedFilter = 'All'.obs;
-  final filters = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'];
+  final filters = ['All', 'Pending', 'Accepted', 'Completed', 'Cancelled'];
+  var appointments = <PatientRequestModel>[].obs;
+  var filteredAppointments = <PatientRequestModel>[].obs;
+  var isLoading = false.obs, isLoadMoreLoading = false.obs, hasMore = true.obs;
+  var isSubmittingReview = false.obs, isCancelling = false.obs;
+  var currentPage = 1.obs;
 
-  var appointments = <PatientRequestModel>[
-    PatientRequestModel(
-      id: '1',
-      patientId: '1',
-      therapistId: '1',
-      serviceName: 'Orthopedic Therapy',
-      serviceId: '1',
-      date: '2024-01-15',
-      time: '10:00 AM',
-      status: 'completed',
-      patientNotes: 'Regular checkup for shoulder pain',
-      requestedAt: DateTime.now().subtract(Duration(days: 2)),
-      therapistName: 'Dr. Sarah Johnson',
-      therapistImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
-      duration: '45 mins',
-      price: 1500.0,
-      review: ReviewModel(
-        id: 'rev1',
-        appointmentId: '1',
-        patientId: '1',
-        therapistId: '1',
-        rating: 4.5,
-        comment: 'Dr. Sarah was very professional and helped me with my shoulder pain effectively.',
-        createdAt: DateTime.now().subtract(Duration(days: 1)),
-        patientName: 'John Doe',
-      ),
-    ),
-    PatientRequestModel(
-      id: '2',
-      patientId: '1',
-      therapistId: '2',
-      serviceName: 'Neuro Rehabilitation',
-      serviceId: '2',
-      date: '2024-01-18',
-      time: '02:30 PM',
-      status: 'completed',
-      patientNotes: 'First session for coordination issues',
-      requestedAt: DateTime.now().subtract(Duration(days: 1)),
-      therapistName: 'Dr. Mike Wilson',
-      therapistImage: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150',
-      duration: '60 mins',
-      price: 2000.0,
-    ),
-    PatientRequestModel(
-      id: '3',
-      patientId: '1',
-      therapistId: '3',
-      serviceName: 'Sports Therapy',
-      serviceId: '3',
-      date: '2024-01-20',
-      time: '11:00 AM',
-      status: 'completed',
-      patientNotes: 'Ankle injury recovery session',
-      requestedAt: DateTime.now().subtract(Duration(days: 5)),
-      therapistName: 'Dr. Emily Davis',
-      therapistImage: 'https://images.unsplash.com/photo-1594824947933-d0501ba2fe65?w=150',
-      duration: '45 mins',
-      price: 1800.0,
-      review: ReviewModel(
-        id: 'rev3',
-        appointmentId: '3',
-        patientId: '1',
-        therapistId: '3',
-        rating: 5.0,
-        comment: 'Excellent service! My ankle feels much better after just one session.',
-        createdAt: DateTime.now().subtract(Duration(days: 4)),
-        patientName: 'John Doe',
-      ),
-    ),
-    PatientRequestModel(
-      id: '4',
-      patientId: '1',
-      therapistId: '1',
-      serviceName: 'Pain Management',
-      serviceId: '4',
-      date: '2024-01-22',
-      time: '03:00 PM',
-      status: 'cancelled',
-      patientNotes: 'Back pain treatment',
-      requestedAt: DateTime.now().subtract(Duration(days: 3)),
-      therapistName: 'Dr. Sarah Johnson',
-      therapistImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
-      duration: '30 mins',
-      price: 1000.0,
-    ),
-    PatientRequestModel(
-      id: '5',
-      patientId: '1',
-      therapistId: '2',
-      serviceName: 'Neuro Therapy',
-      serviceId: '2',
-      date: '2024-01-25',
-      time: '09:30 AM',
-      status: 'confirmed',
-      patientNotes: 'Follow-up session',
-      requestedAt: DateTime.now().subtract(Duration(hours: 12)),
-      therapistName: 'Dr. Mike Wilson',
-      therapistImage: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150',
-      duration: '60 mins',
-      price: 1500.0,
-    ),
-  ].obs;
+  final ScrollController scrollController = ScrollController();
 
-  List<PatientRequestModel> get filteredAppointments {
-    if (selectedFilter.value == 'All') {
-      return appointments;
+  @override
+  void onInit() {
+    super.onInit();
+    loadAppointments();
+    setupScrollListener();
+  }
+
+  void setupScrollListener() {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
+        loadMoreAppointments();
+      }
+    });
+  }
+
+  Future<void> loadAppointments({bool loadMore = false}) async {
+    if (isLoading.value) return;
+    try {
+      if (!loadMore) {
+        isLoading.value = true;
+        currentPage.value = 1;
+        hasMore.value = true;
+        appointments.clear();
+        filteredAppointments.clear();
+      } else {
+        if (!hasMore.value || isLoadMoreLoading.value) return;
+        isLoadMoreLoading.value = true;
+      }
+      final response = await _authService.getRequests(status: selectedFilter.value == 'All' ? '' : selectedFilter.value, page: currentPage.value);
+      if (response != null && response['docs'] is List) {
+        final List newServices = response['docs'];
+        if (newServices.isNotEmpty) {
+          final parsedServices = newServices.map((item) => PatientRequestModel.fromJson(item)).toList();
+          if (loadMore) {
+            appointments.addAll(parsedServices);
+          } else {
+            appointments.assignAll(parsedServices);
+          }
+          filteredAppointments.assignAll(appointments);
+          final totalPages = response['totalPages'] ?? 1;
+          final currentPageNum = response['currentPage'] ?? currentPage.value;
+          hasMore.value = currentPageNum < totalPages;
+          if (hasMore.value) {
+            currentPage.value = currentPageNum + 1;
+          }
+        } else {
+          hasMore.value = false;
+        }
+      } else {
+        if (!loadMore) {
+          toaster.warning("'No services found'");
+        }
+        hasMore.value = false;
+      }
+    } catch (e) {
+      if (!loadMore) {
+        toaster.error('Error loading appointments: ${e.toString()}');
+      }
+    } finally {
+      isLoading.value = false;
+      isLoadMoreLoading.value = false;
     }
-    return appointments.where((appointment) => appointment.status == selectedFilter.value.toLowerCase()).toList();
+  }
+
+  Future<void> loadMoreAppointments() {
+    if (hasMore.value && !isLoading.value && !isLoadMoreLoading.value) {
+      return loadAppointments(loadMore: true);
+    }
+    return Future.value();
   }
 
   void changeFilter(String filter) {
     selectedFilter.value = filter;
-  }
-
-  void cancelAppointment(String appointmentId) {
-    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
-    final index = appointments.indexWhere((app) => app.id == appointmentId);
-    appointments[index] = appointment.copyWith(status: 'cancelled');
+    currentPage.value = 1;
     update();
+    loadAppointments();
   }
 
-  void rescheduleAppointment(String appointmentId, String newDate, String newTime) {
-    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
-    final index = appointments.indexWhere((app) => app.id == appointmentId);
-    appointments[index] = appointment.copyWith(date: newDate, time: newTime, status: 'pending');
-    update();
+  Future<void> cancelAppointment(String appointmentId) async {
+    try {
+      isCancelling.value = true;
+      final response = await _authService.cancelRequests(requestId: appointmentId);
+      if (response != null) {
+        final index = appointments.indexWhere((app) => app.id == appointmentId);
+        if (index != -1) {
+          appointments[index].status = "Cancelled";
+          filteredAppointments.assignAll(appointments);
+        }
+        Get.back();
+        toaster.success("Your appointment has been cancelled successfully");
+      } else {
+        throw Exception('Failed to cancel appointment');
+      }
+    } catch (e) {
+      toaster.error(e.toString());
+    } finally {
+      isCancelling.value = false;
+    }
   }
 
-  void addReview(String appointmentId, double rating, String comment) {
-    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
-    final index = appointments.indexWhere((app) => app.id == appointmentId);
-    final review = ReviewModel(
-      id: 'rev_${DateTime.now().millisecondsSinceEpoch}',
-      appointmentId: appointmentId,
-      patientId: appointment.patientId,
-      therapistId: appointment.therapistId,
-      rating: rating,
-      comment: comment,
-      createdAt: DateTime.now(),
-      patientName: 'You',
-    );
-    appointments[index] = appointment.copyWith(review: review);
-    update();
-    Get.snackbar('Review Submitted!', 'Thank you for your feedback', backgroundColor: Color(0xFF10B981), colorText: Colors.white);
-  }
-
-  void updateReview(String appointmentId, double rating, String comment) {
-    final appointment = appointments.firstWhere((app) => app.id == appointmentId);
-    final index = appointments.indexWhere((app) => app.id == appointmentId);
-    if (appointment.review != null) {
-      final updatedReview = appointment.review!.copyWith(rating: rating, comment: comment);
-      appointments[index] = appointment.copyWith(review: updatedReview);
-      update();
-      Get.snackbar('Review Updated!', 'Your feedback has been updated', backgroundColor: Color(0xFF10B981), colorText: Colors.white);
+  Future<void> submitReview(String appointmentId, int rating, String feedback) async {
+    try {
+      isSubmittingReview.value = true;
+      final response = await _authService.submitFeedback(requestId: appointmentId, rating: rating, feedback: feedback);
+      if (response != null) {
+        final index = appointments.indexWhere((app) => app.id == appointmentId);
+        if (index != -1) {
+          appointments[index].rating = rating;
+          appointments[index].feedback = feedback;
+          filteredAppointments.assignAll(appointments);
+        }
+        Get.back();
+        toaster.success("Thank you for your feedback");
+      } else {
+        throw Exception('Failed to submit review');
+      }
+    } catch (e) {
+      toaster.error(e.toString());
+    } finally {
+      isSubmittingReview.value = false;
     }
   }
 
   void viewAppointmentDetails(String appointmentId) {
     Get.to(() => AppointmentDetails(appointmentId: appointmentId));
+  }
+
+  Future<void> refreshAppointments() async {
+    return loadAppointments();
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
   }
 }

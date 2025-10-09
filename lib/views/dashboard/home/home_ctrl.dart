@@ -1,14 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:patients/models/models.dart';
+import 'package:patients/models/service_model.dart';
 import 'package:patients/utils/config/session.dart';
 import 'package:patients/utils/storage.dart';
+import 'package:patients/utils/toaster.dart';
+import 'package:patients/views/auth/auth_service.dart';
 import 'package:patients/views/dashboard/appointments/ui/appointment_details.dart';
 import 'package:patients/views/dashboard/dashboard_ctrl.dart';
-import 'package:patients/views/dashboard/services/ui/service_details.dart';
-import 'package:patients/views/dashboard/services/ui/slot_selection.dart';
 
 class HomeCtrl extends GetxController {
+  final AuthService _authService = Get.find<AuthService>();
+
   var userName = ''.obs;
 
   var pendingAppointments = <PatientRequestModel>[
@@ -46,22 +48,40 @@ class HomeCtrl extends GetxController {
     ),
   ].obs;
 
-  var regularServices = [
-    ServiceModel(id: 4, name: 'Pediatric Therapy', description: 'Therapy for children to support developmental milestones.', icon: Icons.child_care, isActive: true, price: 1100.0),
-    ServiceModel(id: 5, name: 'Geriatric Therapy', description: 'Gentle therapy for elderly patients to improve mobility.', icon: Icons.elderly, isActive: true, price: 1000.0),
-    ServiceModel(id: 6, name: 'Pain Management', description: 'Advanced techniques to alleviate chronic pain.', icon: Icons.healing, isActive: false, price: 1400.0),
-  ].obs;
+  var regularServices = [].obs;
+
+  var isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     loadUserData();
+    loadServices();
   }
 
   Future<void> loadUserData() async {
     final userData = await read(AppSession.userData);
     if (userData != null) {
       userName.value = userData['name'] ?? 'Patient';
+    }
+  }
+
+  Future<void> loadServices() async {
+    if (isLoading.value) return;
+    try {
+      final response = await _authService.patientServices(page: 1, search: "");
+      if (response != null && response['docs'] is List) {
+        final List newServices = response['docs'];
+        if (newServices.isNotEmpty) {
+          final parsedServices = newServices.map((item) => ServiceModel.fromJson(item)).toList();
+          regularServices.addAll(parsedServices);
+        }
+      }
+    } catch (e) {
+      toaster.error(e.toString());
+    } finally {
+      isLoading.value = false;
+      update();
     }
   }
 
@@ -93,11 +113,7 @@ class HomeCtrl extends GetxController {
     Get.to(() => AppointmentDetails(appointmentId: appointmentId));
   }
 
-  void bookDetails(ServiceModel service) {
-    Get.to(() => ServiceDetails(service: service));
-  }
-
   void bookService(ServiceModel service) {
-    Get.to(() => SlotSelection(service: service));
+    // Get.to(() => SlotSelection(service: service));
   }
 }

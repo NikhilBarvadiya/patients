@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:patients/utils/config/session.dart';
 import 'package:patients/utils/routes/route_name.dart';
-import 'package:patients/utils/storage.dart';
+import 'package:patients/utils/service/notification_service.dart';
 import 'package:patients/utils/toaster.dart';
+import 'package:patients/views/auth/auth_service.dart';
 
 class LoginCtrl extends GetxController {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   var isLoading = false.obs, isPasswordVisible = false.obs;
+
+  AuthService get authService => Get.find<AuthService>();
 
   void togglePasswordVisibility() => isPasswordVisible.toggle();
 
@@ -27,11 +29,9 @@ class LoginCtrl extends GetxController {
     }
     isLoading.value = true;
     try {
-      final request = {'email': emailCtrl.text.trim(), 'password': passwordCtrl.text.trim()};
-      await write(AppSession.token, DateTime.now().toIso8601String());
-      await write(AppSession.userData, request);
-      toaster.success("Welcome to your health journey!");
-      Get.offAllNamed(AppRouteNames.dashboard);
+      String? fcmToken = await notificationService.getToken();
+      final request = {'email': emailCtrl.text.trim(), 'password': passwordCtrl.text.trim(), 'fcmToken': fcmToken ?? ""};
+      await authService.login(request);
     } finally {
       emailCtrl.clear();
       passwordCtrl.clear();

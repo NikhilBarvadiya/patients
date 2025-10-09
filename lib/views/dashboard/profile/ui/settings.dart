@@ -46,6 +46,8 @@ class Settings extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildSettingsCard(
                       children: [
+                        _buildSettingsTile(icon: Icons.lock_outline, title: 'Change Password', subtitle: 'Update your account password', onTap: () => _showChangePasswordDialog(ctrl)),
+                        _buildDivider(),
                         _buildSettingsTile(
                           icon: Icons.privacy_tip_outlined,
                           title: 'Privacy Policy',
@@ -223,6 +225,133 @@ We're here to help you succeed!
           ),
         ],
       ),
+    );
+  }
+
+  void _showChangePasswordDialog(ProfileCtrl ctrl) {
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: decoration.colorScheme.primary.withOpacity(0.1), shape: BoxShape.circle),
+                    child: Icon(Icons.lock_reset, color: decoration.colorScheme.primary, size: 40),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Change Password',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter your current and new password',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPasswordField(
+                    controller: ctrl.currentPasswordController,
+                    label: 'Current Password',
+                    isVisible: ctrl.isCurrentPasswordVisible.value,
+                    onToggleVisibility: () {
+                      ctrl.toggleCurrentPasswordVisibility();
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(
+                    controller: ctrl.newPasswordController,
+                    label: 'New Password',
+                    isVisible: ctrl.isNewPasswordVisible.value,
+                    onToggleVisibility: () {
+                      ctrl.toggleNewPasswordVisibility();
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(
+                    controller: ctrl.confirmPasswordController,
+                    label: 'Confirm New Password',
+                    isVisible: ctrl.isConfirmPasswordVisible.value,
+                    onToggleVisibility: () {
+                      ctrl.toggleConfirmPasswordVisibility();
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Obx(
+                    () => Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Get.back(),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text('Cancel', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => ctrl.changePassword(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: decoration.colorScheme.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: ctrl.isSaving.value
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : Text(
+                                    'Update',
+                                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.white),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({required TextEditingController controller, required String label, required bool isVisible, required VoidCallback onToggleVisibility}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700]),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          obscureText: !isVisible,
+          decoration: InputDecoration(
+            hintText: "******",
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: InputBorder.none,
+            suffixIcon: IconButton(
+              icon: Icon(isVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey[500]),
+              onPressed: onToggleVisibility,
+            ).paddingOnly(right: 5),
+          ),
+        ),
+      ],
     );
   }
 
