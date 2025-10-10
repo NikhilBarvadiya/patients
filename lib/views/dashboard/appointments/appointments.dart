@@ -170,7 +170,7 @@ class _AppointmentsState extends State<Appointments> {
           itemBuilder: (context, index) {
             final filter = ctrl.filters[index];
             final isSelected = ctrl.selectedFilter.value == filter;
-            return Padding(padding: const EdgeInsets.only(right: 8), child: _buildFilterChip(filter, isSelected, ctrl));
+            return _buildFilterChip(filter, isSelected, ctrl).paddingOnly(right: 8);
           },
         ),
       ),
