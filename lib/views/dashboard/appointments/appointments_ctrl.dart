@@ -100,11 +100,7 @@ class AppointmentsCtrl extends GetxController {
       isCancelling.value = true;
       final response = await _authService.cancelRequests(requestId: appointmentId);
       if (response != null) {
-        final index = appointments.indexWhere((app) => app.id == appointmentId);
-        if (index != -1) {
-          appointments[index].status = "Cancelled";
-          filteredAppointments.assignAll(appointments);
-        }
+        filteredAppointments.removeWhere((app) => app.id == appointmentId);
         Get.back();
         toaster.success("Your appointment has been cancelled successfully");
       } else {

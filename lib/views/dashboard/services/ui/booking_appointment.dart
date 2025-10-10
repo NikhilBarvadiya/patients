@@ -37,7 +37,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     setState(() => _isProcessing = false);
-    _confirmBooking(response.paymentId ?? 'N/A', 'completed');
+    _confirmBooking(response.paymentId ?? 'N/A', 'paid');
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -73,7 +73,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
       setState(() => _isProcessing = true);
       _initiateRazorpayPayment();
     } else {
-      _confirmBooking('OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'pending');
+      _confirmBooking('OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'paid');
     }
   }
 

@@ -207,10 +207,22 @@ class AppointmentDetails extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(12)),
             child: Row(
+              spacing: 10.0,
               children: [
                 Expanded(child: _buildInfoItem(Icons.calendar_today_rounded, 'Date', formattedDate)),
                 Expanded(child: _buildInfoItem(Icons.access_time_rounded, 'Time', formattedTime)),
-                Expanded(child: _buildInfoItem(Icons.currency_rupee_rounded, 'Fee', '₹${appointment.charge}')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(12)),
+            child: Row(
+              spacing: 10.0,
+              children: [
+                Expanded(child: _buildInfoItem(Icons.currency_rupee_rounded, 'Fee', '₹${appointment.charge} (${appointment.paymentStatus.capitalizeFirst.toString()})')),
+                Expanded(child: _buildInfoItem(Icons.payment_rounded, 'Payment Type', appointment.paymentType.capitalizeFirst.toString())),
               ],
             ),
           ),
@@ -220,22 +232,27 @@ class AppointmentDetails extends StatelessWidget {
   }
 
   Widget _buildInfoItem(IconData icon, String label, String value) {
-    return Column(
+    return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+            ),
+          ],
         ),
       ],
     );
@@ -446,12 +463,6 @@ class AppointmentDetails extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: const Color(0xFFF59E0B).withOpacity(0.1), shape: BoxShape.circle),
-            child: const Icon(Icons.star_outline_rounded, color: Color(0xFFF59E0B), size: 24),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,7 +472,7 @@ class AppointmentDetails extends StatelessWidget {
                   style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
                 ),
                 const SizedBox(height: 4),
-                Text('Share your feedback about the service', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
+                Text('Share your feedback about the service', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
           ),

@@ -13,6 +13,8 @@ class PatientRequestModel {
   int v;
   String cancelledBy;
   String feedback;
+  String paymentType;
+  String paymentStatus;
 
   PatientRequestModel({
     required this.id,
@@ -29,6 +31,8 @@ class PatientRequestModel {
     required this.v,
     required this.cancelledBy,
     required this.feedback,
+    required this.paymentType,
+    required this.paymentStatus,
   });
 
   factory PatientRequestModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +51,8 @@ class PatientRequestModel {
       v: json['__v'] ?? 0,
       cancelledBy: json['cancelledBy'] ?? '',
       feedback: json['feedback'] ?? '',
+      paymentType: json['payment']?["paymentMethod"] ?? 'offline',
+      paymentStatus: json['payment']?["status"] ?? 'unPaid',
     );
   }
 

@@ -479,7 +479,13 @@ class _AppointmentsState extends State<Appointments> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            Row(children: [Expanded(child: _buildInfoTile(Icons.currency_rupee_rounded, 'Charge', '₹${appointment.charge}'))]),
+                            Row(
+                              children: [
+                                Expanded(child: _buildInfoTile(Icons.currency_rupee_rounded, 'Charge', '₹${appointment.charge} (${appointment.paymentStatus.capitalizeFirst.toString()})')),
+                                const SizedBox(width: 12),
+                                Expanded(child: _buildInfoTile(Icons.payment_rounded, 'Payment Type', appointment.paymentType.capitalizeFirst.toString())),
+                              ],
+                            ),
                             if (appointment.status == 'Completed' && appointment.rating > 0) ...[const SizedBox(height: 12), _buildReviewInfo(appointment)],
                             const SizedBox(height: 16),
                             Divider(color: Colors.grey[300], height: 1),
