@@ -5,15 +5,28 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:patients/utils/theme/light.dart';
 import 'package:patients/views/dashboard/appointments/appointments_ctrl.dart';
+import 'package:patients/views/dashboard/home/home_ctrl.dart';
 import '../../../../models/patient_request_model.dart';
 
 class AppointmentDetails extends StatelessWidget {
   final String appointmentId;
-  final AppointmentsCtrl ctrl = Get.find();
+  final String? isHomeAppoint;
 
-  AppointmentDetails({super.key, required this.appointmentId});
+  final HomeCtrl homeCtrl = Get.find<HomeCtrl>();
 
-  PatientRequestModel get appointment => ctrl.appointments.firstWhere((app) => app.id == appointmentId);
+  AppointmentsCtrl? get appointmentsCtrl => Get.isRegistered<AppointmentsCtrl>() ? Get.find<AppointmentsCtrl>() : null;
+
+  AppointmentDetails({super.key, required this.appointmentId, this.isHomeAppoint});
+
+  PatientRequestModel get appointment {
+    if (isHomeAppoint != null) {
+      return homeCtrl.pendingAppointments.firstWhere((app) => app.id == appointmentId, orElse: () => throw Exception('Appointment not found in HomeCtrl'));
+    } else if (appointmentsCtrl != null) {
+      return appointmentsCtrl!.appointments.firstWhere((app) => app.id == appointmentId, orElse: () => throw Exception('Appointment not found in AppointmentsCtrl'));
+    } else {
+      return PatientRequestModel.fromJson({});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +54,14 @@ class AppointmentDetails extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: AppTheme.primaryLight),
-            onPressed: ctrl.refreshAppointments,
+            icon: Icon(Icons.refresh_rounded, color: AppTheme.primaryBlue),
+            onPressed: () {
+              if (isHomeAppoint != null) {
+                homeCtrl.loadPendingAppointments();
+              } else {
+                appointmentsCtrl?.refreshAppointments();
+              }
+            },
           ),
         ],
       ),
@@ -66,8 +85,17 @@ class AppointmentDetails extends StatelessWidget {
               ),
             ),
             Obx(() {
-              if (ctrl.isCancelling.value || ctrl.isSubmittingReview.value) {
-                return _buildFullScreenLoading(ctrl.isCancelling.value ? 'Cancelling Appointment...' : 'Submitting Review...', ctrl.isCancelling.value ? Icons.cancel_outlined : Icons.star_outlined);
+              if (isHomeAppoint != null) {
+                if (homeCtrl.isDeleteLoading.value) {
+                  return _buildFullScreenLoading('Cancelling Appointment...', Icons.cancel_outlined);
+                }
+              } else if (appointmentsCtrl != null) {
+                if (appointmentsCtrl!.isCancelling.value || appointmentsCtrl!.isSubmittingReview.value) {
+                  return _buildFullScreenLoading(
+                    appointmentsCtrl!.isCancelling.value ? 'Cancelling Appointment...' : 'Submitting Review...',
+                    appointmentsCtrl!.isCancelling.value ? Icons.cancel_outlined : Icons.star_outlined,
+                  );
+                }
               }
               return const SizedBox.shrink();
             }),
@@ -98,10 +126,10 @@ class AppointmentDetails extends StatelessWidget {
                   Container(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.1), shape: BoxShape.circle),
-                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryLight), strokeWidth: 3),
+                    decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue), strokeWidth: 3),
                   ),
-                  Icon(icon, size: 30, color: AppTheme.primaryLight),
+                  Icon(icon, size: 30, color: AppTheme.primaryBlue),
                 ],
               ),
               const SizedBox(height: 20),
@@ -133,13 +161,13 @@ class AppointmentDetails extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 45,
+                height: 45,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppTheme.primaryLight, AppTheme.primaryLight.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  gradient: LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 30),
+                child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -153,7 +181,7 @@ class AppointmentDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(appointment.therapistName, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+                    Text(appointment.therapistName, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
                   ],
                 ),
               ),
@@ -196,8 +224,8 @@ class AppointmentDetails extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, size: 18, color: AppTheme.primaryLight),
+          decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+          child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
         ),
         const SizedBox(height: 8),
         Text(
@@ -256,7 +284,7 @@ class AppointmentDetails extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.primaryLight.withOpacity(0.2), width: 2),
+                  border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2), width: 2),
                 ),
                 child: ClipOval(
                   child: CachedNetworkImage(
@@ -285,7 +313,7 @@ class AppointmentDetails extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${appointment.preferredType} Specialist',
-                      style: GoogleFonts.poppins(fontSize: 14, color: AppTheme.primaryLight, fontWeight: FontWeight.w500),
+                      style: GoogleFonts.poppins(fontSize: 14, color: AppTheme.primaryBlue, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 4),
                     Text('${appointment.serviceName} Expert', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
@@ -330,8 +358,6 @@ class AppointmentDetails extends StatelessWidget {
           const SizedBox(height: 12),
           _buildDetailRow(Icons.currency_rupee_rounded, 'Consultation Fee', '₹${appointment.charge}'),
           const SizedBox(height: 12),
-          _buildDetailRow(Icons.receipt_rounded, 'Appointment ID', appointment.id),
-          const SizedBox(height: 12),
           _buildDetailRow(Icons.medical_services_rounded, 'Service Type', appointment.serviceName),
         ],
       ),
@@ -346,8 +372,8 @@ class AppointmentDetails extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, size: 18, color: AppTheme.primaryLight),
+            decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -490,9 +516,9 @@ class AppointmentDetails extends StatelessWidget {
   }
 
   void _showAddReviewDialog() {
+    if (appointmentsCtrl == null) return;
     int rating = 0;
     final commentController = TextEditingController();
-
     Get.dialog(
       Dialog(
         backgroundColor: Colors.white,
@@ -562,9 +588,9 @@ class AppointmentDetails extends StatelessWidget {
                       Expanded(
                         child: Obx(
                           () => ElevatedButton(
-                            onPressed: rating > 0 && !ctrl.isSubmittingReview.value
+                            onPressed: rating > 0 && !appointmentsCtrl!.isSubmittingReview.value
                                 ? () {
-                                    ctrl.submitReview(appointmentId, rating, commentController.text.trim());
+                                    appointmentsCtrl!.submitReview(appointmentId, rating, commentController.text.trim());
                                     Get.back();
                                   }
                                 : null,
@@ -575,7 +601,7 @@ class AppointmentDetails extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               elevation: 0,
                             ),
-                            child: ctrl.isSubmittingReview.value
+                            child: appointmentsCtrl!.isSubmittingReview.value
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                                 : Text('Submit Review', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
                           ),
@@ -639,7 +665,11 @@ class AppointmentDetails extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          ctrl.cancelAppointment(appointmentId);
+                          if (isHomeAppoint != null) {
+                            homeCtrl.cancelAppointment(appointmentId);
+                          } else {
+                            appointmentsCtrl?.cancelAppointment(appointmentId);
+                          }
                           Get.back();
                         },
                         style: ElevatedButton.styleFrom(

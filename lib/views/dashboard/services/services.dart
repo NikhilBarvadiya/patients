@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:patients/views/dashboard/services/ui/service_card.dart';
 import 'services_ctrl.dart';
 
@@ -95,7 +96,7 @@ class Services extends StatelessWidget {
                 ),
                 Obx(() {
                   if (ctrl.isLoading.value && ctrl.filteredServices.isEmpty) {
-                    return SliverFillRemaining(child: _buildLoadingState());
+                    return _buildServicesShimmer();
                   }
                   if (ctrl.filteredServices.isEmpty && !ctrl.isLoading.value) {
                     return SliverFillRemaining(child: _buildEmptyState(ctrl));
@@ -121,17 +122,79 @@ class Services extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const CircularProgressIndicator(color: Color(0xFF6C63FF)),
-        const SizedBox(height: 20),
-        Text(
-          'Loading Services...',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[600]),
-        ),
-      ],
+  Widget _buildServicesShimmer() {
+    return SliverPadding(
+      padding: const EdgeInsets.all(20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return Shimmer.fromColors(
+            baseColor: Colors.grey.shade200,
+            highlightColor: Colors.grey.shade50,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 150,
+                                height: 18,
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: 100,
+                                height: 14,
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                width: 80,
+                                height: 20,
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      height: 14,
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      height: 14,
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }, childCount: 6),
+      ),
     );
   }
 

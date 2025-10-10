@@ -56,7 +56,7 @@ class _AppointmentsState extends State<Appointments> {
           backgroundColor: Colors.grey[50],
           body: SafeArea(
             child: RefreshIndicator(
-              color: AppTheme.primaryLight,
+              color: AppTheme.primaryBlue,
               onRefresh: ctrl.refreshAppointments,
               child: Stack(
                 children: [
@@ -100,10 +100,10 @@ class _AppointmentsState extends State<Appointments> {
                   Container(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.1), shape: BoxShape.circle),
-                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryLight), strokeWidth: 3),
+                    decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue), strokeWidth: 3),
                   ),
-                  Icon(icon, size: 30, color: AppTheme.primaryLight),
+                  Icon(icon, size: 30, color: AppTheme.primaryBlue),
                 ],
               ),
               const SizedBox(height: 20),
@@ -128,15 +128,6 @@ class _AppointmentsState extends State<Appointments> {
       backgroundColor: Colors.white,
       pinned: true,
       floating: true,
-      leading: IconButton(
-        style: ButtonStyle(
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          padding: const WidgetStatePropertyAll(EdgeInsets.all(8)),
-          backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
-        ),
-        icon: const Icon(Icons.arrow_back, color: Colors.black87),
-        onPressed: () => Get.back(),
-      ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -151,11 +142,19 @@ class _AppointmentsState extends State<Appointments> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: Icon(Icons.refresh_rounded, color: AppTheme.primaryLight),
-          onPressed: ctrl.refreshAppointments,
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            style: ButtonStyle(
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
+              backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+            ),
+            icon: const Icon(Icons.refresh, color: Colors.black87, size: 22),
+            onPressed: () => ctrl.refreshAppointments(),
+            tooltip: 'Refresh Services',
+          ),
         ),
-        const SizedBox(width: 8),
       ],
     );
   }
@@ -189,13 +188,13 @@ class _AppointmentsState extends State<Appointments> {
       selected: isSelected,
       onSelected: (selected) => ctrl.changeFilter(label),
       backgroundColor: Colors.white,
-      selectedColor: AppTheme.primaryLight,
+      selectedColor: AppTheme.primaryBlue,
       checkmarkColor: Colors.white,
       elevation: isSelected ? 2 : 0,
-      shadowColor: AppTheme.primaryLight.withOpacity(0.3),
+      shadowColor: AppTheme.primaryBlue.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: isSelected ? AppTheme.primaryLight : Colors.grey[300]!),
+        side: BorderSide(color: isSelected ? AppTheme.primaryBlue : Colors.grey[300]!),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     );
@@ -368,7 +367,7 @@ class _AppointmentsState extends State<Appointments> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey.shade300, width: isExpanded ? .8 : .3),
-            boxShadow: [BoxShadow(color: isExpanded ? AppTheme.primaryLight.withOpacity(0.1) : Colors.black.withOpacity(0.02), blurRadius: isExpanded ? 12 : 8, offset: const Offset(0, 2))],
+            boxShadow: [BoxShadow(color: isExpanded ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.black.withOpacity(0.02), blurRadius: isExpanded ? 12 : 8, offset: const Offset(0, 2))],
           ),
           child: Column(
             children: [
@@ -377,13 +376,12 @@ class _AppointmentsState extends State<Appointments> {
                 child: Row(
                   children: [
                     Container(
-                      width: 50,
-                      height: 50,
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [AppTheme.primaryLight, AppTheme.primaryLight.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        gradient: LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 26),
+                      child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -455,7 +453,7 @@ class _AppointmentsState extends State<Appointments> {
                         const Spacer(),
                         Text(
                           'Tap for details',
-                          style: GoogleFonts.poppins(fontSize: 11, color: AppTheme.primaryLight, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: 11, color: AppTheme.primaryBlue, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -517,8 +515,8 @@ class _AppointmentsState extends State<Appointments> {
         children: [
           Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, size: 16, color: AppTheme.primaryLight),
+            decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, size: 16, color: AppTheme.primaryBlue),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -601,14 +599,14 @@ class _AppointmentsState extends State<Appointments> {
             icon: const Icon(Icons.visibility_rounded, size: 18),
             label: Text('View Details', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppTheme.primaryLight,
-              side: BorderSide(color: AppTheme.primaryLight),
+              foregroundColor: AppTheme.primaryBlue,
+              side: BorderSide(color: AppTheme.primaryBlue),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
           ),
         ),
-        if (appointment.status == 'Pending')
+        if (appointment.status != 'Completed' && appointment.status != 'Cancelled')
           Expanded(
             child: OutlinedButton.icon(
               onPressed: () => _showCancelDialog(appointment.id, ctrl),
@@ -655,7 +653,7 @@ class _AppointmentsState extends State<Appointments> {
   Widget _buildLoadingItem() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Center(child: CircularProgressIndicator(color: AppTheme.primaryLight, strokeWidth: 2.5)),
+      child: Center(child: CircularProgressIndicator(color: AppTheme.primaryBlue, strokeWidth: 2.5)),
     );
   }
 
@@ -798,86 +796,89 @@ class _AppointmentsState extends State<Appointments> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
-                    child: const Icon(Icons.star_rounded, color: Color(0xFF2563EB), size: 40),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Rate Your Experience',
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'How was your service experience?',
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], height: 1.5),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        onPressed: () => setState(() => rating = index + 1),
-                        icon: Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: const Color(0xFFF59E0B), size: 32),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(rating == 0 ? 'Tap to rate' : '$rating ${rating == 1 ? 'star' : 'stars'}', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: commentController,
-                    minLines: 3,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      labelText: 'Your feedback (optional)',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.all(16),
+            return ClipRRect(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
+                      child: const Icon(Icons.star_rounded, color: Color(0xFF2563EB), size: 40),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Get.back(),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey[700],
-                            side: BorderSide(color: Colors.grey[300]!),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: Text('Cancel', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
-                        ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Rate Your Experience',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'How was your service experience?',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], height: 1.5),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          onPressed: () => setState(() => rating = index + 1),
+                          icon: Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: const Color(0xFFF59E0B), size: 32),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(rating == 0 ? 'Tap to rate' : '$rating ${rating == 1 ? 'star' : 'stars'}', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: commentController,
+                      minLines: 3,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        labelText: 'Your feedback (optional)',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.all(16),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Obx(
-                          () => ElevatedButton(
-                            onPressed: rating > 0 && !ctrl.isSubmittingReview.value ? () => ctrl.submitReview(appointmentId, rating, commentController.text.trim()) : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB),
-                              foregroundColor: Colors.white,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Get.back(),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.grey[700],
+                              side: BorderSide(color: Colors.grey[300]!),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              elevation: 0,
                             ),
-                            child: ctrl.isSubmittingReview.value
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : Text('Submit Review', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                            child: Text('Cancel', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Obx(
+                            () => ElevatedButton(
+                              onPressed: rating > 0 && !ctrl.isSubmittingReview.value ? () => ctrl.submitReview(appointmentId, rating, commentController.text.trim()) : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                elevation: 0,
+                              ),
+                              child: ctrl.isSubmittingReview.value
+                                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : Text('Submit Review', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },

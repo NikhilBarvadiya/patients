@@ -60,7 +60,7 @@ class PatientRequestModel {
 }
 
 class Doctor {
-  String doctorId;
+  dynamic doctorId;
   int rating;
   bool isSend;
   String fcmToken;
@@ -69,7 +69,7 @@ class Doctor {
   Doctor({required this.doctorId, required this.rating, required this.isSend, required this.fcmToken, required this.id});
 
   factory Doctor.fromJson(Map<String, dynamic> json) {
-    return Doctor(doctorId: json['id'] ?? '', rating: json['rating'] ?? 0, isSend: json['isSend'] ?? false, fcmToken: json['fcmToken'] ?? '', id: json['_id'] ?? '');
+    return Doctor(doctorId: json['id']?['name'] ?? '', rating: json['rating'] ?? 0, isSend: json['isSend'] ?? false, fcmToken: json['fcmToken'] ?? '', id: json['_id'] ?? '');
   }
 }
 

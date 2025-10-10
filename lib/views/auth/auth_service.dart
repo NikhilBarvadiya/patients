@@ -93,17 +93,17 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<dynamic> createRequests(Map<String, dynamic> request) async {
+  Future<bool> createRequests(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.createRequests, request, ApiType.post);
       if (!response.success) {
         toaster.warning(response.message ?? 'Failed to requests booking');
-        return null;
+        return false;
       }
       return true;
     } catch (err) {
       toaster.error('Network error: ${err.toString()}');
-      return null;
+      return false;
     }
   }
 

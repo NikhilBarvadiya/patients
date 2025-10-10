@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:patients/utils/decoration.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:patients/views/auth/auth_service.dart';
+import 'package:patients/views/dashboard/home/home_ctrl.dart';
 import '../../../../models/service_model.dart';
 
-class SlotSelection extends StatefulWidget {
+class BookingAppointment extends StatefulWidget {
   final ServiceModel service;
 
-  const SlotSelection({super.key, required this.service});
+  const BookingAppointment({super.key, required this.service});
 
   @override
-  State<SlotSelection> createState() => _SlotSelectionState();
+  State<BookingAppointment> createState() => _BookingAppointmentState();
 }
 
-class _SlotSelectionState extends State<SlotSelection> {
-  final dateController = TextEditingController();
-  final timeController = TextEditingController();
+class _BookingAppointmentState extends State<BookingAppointment> {
   final _razorpay = Razorpay();
-  String _selectedPaymentMethod = 'online';
+  String _selectedPaymentMethod = 'online', _selectedBookingType = 'Regular';
   bool _isProcessing = false;
 
   @override
@@ -36,7 +37,7 @@ class _SlotSelectionState extends State<SlotSelection> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     setState(() => _isProcessing = false);
-    _confirmBooking(dateController.text, timeController.text, response.paymentId ?? 'N/A', 'completed');
+    _confirmBooking(response.paymentId ?? 'N/A', 'completed');
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -68,39 +69,35 @@ class _SlotSelectionState extends State<SlotSelection> {
   }
 
   void _processBooking() {
-    if (dateController.text.isEmpty || timeController.text.isEmpty) {
-      Get.snackbar('Incomplete Details', 'Please select both date and time', backgroundColor: Colors.orange, colorText: Colors.white);
-      return;
-    }
-
     if (_selectedPaymentMethod == 'online') {
       setState(() => _isProcessing = true);
       _initiateRazorpayPayment();
     } else {
-      _confirmBooking(dateController.text, timeController.text, 'OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'pending');
+      _confirmBooking('OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'pending');
     }
   }
 
-  void _confirmBooking(String date, String time, String transactionId, String status) {
-    // final bookingData = {
-    //   'service': widget.service.name,
-    //   'date': date,
-    //   'time': time,
-    //   'amount': widget.service.price,
-    //   'paymentMethod': _selectedPaymentMethod,
-    //   'transactionId': transactionId,
-    //   'status': status,
-    //   'screenshot': _paymentScreenshot != null,
-    // };
-    Get.back();
-    Get.snackbar(
-      'Booking Confirmed! 🎉',
-      '${widget.service.name} booked for $date at $time\nPayment: ${status == 'completed' ? 'Confirmed' : 'Pending Verification'}',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-    );
+  Future<void> _confirmBooking(String transactionId, String status) async {
+    setState(() => _isProcessing = true);
+    final bookingData = {
+      'serviceId': widget.service.id,
+      'preferredType': _selectedBookingType,
+      'payment': {'service': widget.service.name, 'amount': widget.service.charge, 'paymentMethod': _selectedPaymentMethod, 'transactionId': transactionId, 'status': status},
+    };
+    bool isCheck = await Get.find<AuthService>().createRequests(bookingData);
+    if (isCheck == true) {
+      Get.find<HomeCtrl>().loadPendingAppointments();
+      Get.back();
+      Get.snackbar(
+        'Booking Confirmed! 🎉',
+        '${widget.service.name} booked for $_selectedBookingType Doctor\nPayment: ${status == 'completed' ? 'Confirmed' : 'Pending Verification'}',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+      );
+    }
+    setState(() => _isProcessing = false);
   }
 
   @override
@@ -123,26 +120,50 @@ class _SlotSelectionState extends State<SlotSelection> {
           ? _buildLoadingState()
           : Padding(
               padding: const EdgeInsets.all(20),
-              child: ListView(children: [_buildServiceInfo(), const SizedBox(height: 24), _buildSlotSelection(), const SizedBox(height: 24), _buildPaymentSection()]),
+              child: ListView(children: [_buildServiceInfo(), const SizedBox(height: 24), _buildBookingTypeSection(), const SizedBox(height: 24), _buildPaymentSection()]),
             ),
       bottomNavigationBar: _buildBookButton(),
     );
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB))),
-          const SizedBox(height: 20),
-          Text(
-            'Processing Payment...',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[700]),
+    return Container(
+      color: Colors.black.withOpacity(0.7),
+      child: Center(
+        child: Container(
+          width: 200,
+          height: 200,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
           ),
-          const SizedBox(height: 8),
-          Text('Please wait while we process your payment', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500])),
-        ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(color: decoration.colorScheme.primary.withOpacity(0.1), shape: BoxShape.circle),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(decoration.colorScheme.primary), strokeWidth: 3),
+                  ),
+                  Icon(Icons.check_circle_rounded, size: 30, color: decoration.colorScheme.primary),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Processing Payment',
+                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text('Please wait...', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -184,7 +205,7 @@ class _SlotSelectionState extends State<SlotSelection> {
     );
   }
 
-  Widget _buildSlotSelection() {
+  Widget _buildBookingTypeSection() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -196,85 +217,80 @@ class _SlotSelectionState extends State<SlotSelection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select Date & Time',
+            'Booking Type',
             style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
           ),
           const SizedBox(height: 8),
-          Text('Choose your preferred appointment slot', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+          Text('Choose your preferred doctor type', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
           const SizedBox(height: 20),
-          TextField(
-            controller: dateController,
-            decoration: InputDecoration(
-              labelText: 'Appointment Date',
-              hintText: 'Select date',
-              prefixIcon: Icon(Icons.calendar_today_outlined, color: Color(0xFF2563EB)),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFF2563EB)),
+          Row(
+            children: [
+              Expanded(
+                child: _buildBookingTypeOption(
+                  title: 'Regular Doctor',
+                  subtitle: 'Experienced medical professionals',
+                  value: 'Regular',
+                  icon: Icons.medical_services,
+                  color: Color(0xFF2563EB),
+                  isSelected: _selectedBookingType == 'Regular',
+                  onTap: () => setState(() => _selectedBookingType = 'Regular'),
+                ),
               ),
-            ),
-            readOnly: true,
-            onTap: () async {
-              final DateTime now = DateTime.now();
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: now,
-                firstDate: now,
-                lastDate: DateTime(now.year + 1, now.month, now.day),
-                builder: (context, child) {
-                  return Theme(
-                    data: ThemeData.light().copyWith(
-                      primaryColor: Color(0xFF2563EB),
-                      colorScheme: ColorScheme.light(primary: Color(0xFF2563EB)),
-                      buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
-                    ),
-                    child: child!,
-                  );
-                },
-              );
-              if (picked != null) {
-                dateController.text = "${picked.day}/${picked.month}/${picked.year}";
-                setState(() {});
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: timeController,
-            decoration: InputDecoration(
-              labelText: 'Appointment Time',
-              hintText: 'Select time',
-              prefixIcon: Icon(Icons.access_time_outlined, color: Color(0xFF2563EB)),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFF2563EB)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildBookingTypeOption(
+                  title: 'Intern Doctor',
+                  subtitle: 'Under supervision, more affordable',
+                  value: 'Intern',
+                  icon: Icons.school,
+                  color: Color(0xFF2563EB),
+                  isSelected: _selectedBookingType == 'Intern',
+                  onTap: () => setState(() => _selectedBookingType = 'Intern'),
+                ),
               ),
-            ),
-            readOnly: true,
-            onTap: () async {
-              final TimeOfDay? picked = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.now(),
-                builder: (context, child) {
-                  return Theme(
-                    data: ThemeData.light().copyWith(
-                      primaryColor: Color(0xFF2563EB),
-                      colorScheme: ColorScheme.light(primary: Color(0xFF2563EB)),
-                      buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
-                    ),
-                    child: child!,
-                  );
-                },
-              );
-              if (picked != null) {
-                timeController.text = "${picked.hourOfPeriod}:${picked.minute.toString().padLeft(2, '0')} ${picked.period == DayPeriod.am ? 'AM' : 'PM'}";
-                setState(() {});
-              }
-            },
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBookingTypeOption({
+    required String title,
+    required String subtitle,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? color : Colors.grey[300]!, width: isSelected ? 1.5 : 1),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? color : Colors.grey[600], size: 24),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isSelected ? color : Colors.black87),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: GoogleFonts.poppins(fontSize: 10, color: isSelected ? color.withOpacity(0.8) : Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -358,7 +374,7 @@ class _SlotSelectionState extends State<SlotSelection> {
   }
 
   Widget _buildBookButton() {
-    final isFormValid = dateController.text.isNotEmpty && timeController.text.isNotEmpty && (_selectedPaymentMethod == 'online' || (_selectedPaymentMethod == 'offline'));
+    final isFormValid = (_selectedPaymentMethod == 'online' || _selectedPaymentMethod == 'offline') && (_selectedBookingType == 'Regular' || _selectedBookingType == 'Intern');
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(

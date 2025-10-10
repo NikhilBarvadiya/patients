@@ -8,6 +8,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:patients/firebase_options.dart';
+import 'package:patients/utils/storage.dart';
+import 'package:patients/views/dashboard/appointments/appointments_ctrl.dart';
+import 'package:patients/views/dashboard/dashboard_ctrl.dart';
 import 'package:patients/views/preload.dart';
 import 'package:patients/utils/routes/route_methods.dart';
 import 'package:patients/utils/routes/route_name.dart';
@@ -36,27 +39,38 @@ Future<void> main() async {
   runApp(const RestartApp(child: MyApp()));
 }
 
-String? lastHandledMessageId;
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  String? lastHandledMessageId = await read('notificationKey');
   if (message.messageId != null && message.messageId != lastHandledMessageId) {
-    lastHandledMessageId = message.messageId;
+    await write('notificationKey', message.messageId);
     await notificationService.init();
-    notificationService.showRemoteNotificationAndroid(message);
     _handleNotificationClick(message);
   }
 }
 
 void terminatedNotification() async {
+  String? lastHandledMessageId = await read('notificationKey');
   RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null && initialMessage.messageId != lastHandledMessageId) {
-    lastHandledMessageId = initialMessage.messageId;
-    notificationService.showRemoteNotificationAndroid(initialMessage);
+    await write('notificationKey', initialMessage.messageId);
+    await notificationService.init();
     _handleNotificationClick(initialMessage);
   }
 }
 
-void _handleNotificationClick(RemoteMessage message) async {}
+void _handleNotificationClick(RemoteMessage message) async {
+  final ctrl = Get.isRegistered<DashboardCtrl>() ? Get.find<DashboardCtrl>() : Get.put(DashboardCtrl());
+  ctrl.changeTab(2);
+  final appointmentsCtrl = Get.isRegistered<AppointmentsCtrl>() ? Get.find<AppointmentsCtrl>() : Get.put(AppointmentsCtrl());
+  if (message.notification?.title == "Request Accepted") {
+    appointmentsCtrl.selectedFilter.value = "Accepted";
+  } else if (message.notification?.title == "Request Cancelled") {
+    appointmentsCtrl.selectedFilter.value = "Cancelled";
+  } else if (message.notification?.title == "Appointment Completed") {
+    appointmentsCtrl.selectedFilter.value = "Completed";
+  }
+  appointmentsCtrl.changeFilter(appointmentsCtrl.selectedFilter.value);
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
