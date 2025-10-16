@@ -27,8 +27,11 @@ class Login extends StatelessWidget {
                           Container(
                             width: 72,
                             height: 72,
-                            decoration: BoxDecoration(color: decoration.colorScheme.primary, borderRadius: BorderRadius.circular(18)),
-                            child: const Icon(Icons.health_and_safety_rounded, color: Colors.white, size: 36),
+                            decoration: BoxDecoration(
+                              color: decoration.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(18),
+                              image: DecorationImage(image: AssetImage("assets/logo.png")),
+                            ),
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -102,18 +105,7 @@ class Login extends StatelessWidget {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(color: decoration.colorScheme.primary, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 36),
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(

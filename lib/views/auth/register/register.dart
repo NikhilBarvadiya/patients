@@ -28,8 +28,11 @@ class Register extends StatelessWidget {
                             Container(
                               width: 72,
                               height: 72,
-                              decoration: BoxDecoration(color: decoration.colorScheme.primary, borderRadius: BorderRadius.circular(18)),
-                              child: const Icon(Icons.health_and_safety_rounded, color: Colors.white, size: 36),
+                              decoration: BoxDecoration(
+                                color: decoration.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(18),
+                                image: DecorationImage(image: AssetImage("assets/logo.png")),
+                              ),
                             ),
                             const SizedBox(height: 24),
                             Text(

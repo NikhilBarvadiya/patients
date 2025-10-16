@@ -93,10 +93,10 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 40, offset: const Offset(0, 15))],
+                                    image: DecorationImage(image: AssetImage("assets/logo.png")),
                                   ),
                                   child: Stack(
                                     children: [
-                                      Center(child: Icon(Icons.health_and_safety_rounded, size: 56, color: const Color(0xFF2563EB))),
                                       if (_controller.status == AnimationStatus.forward)
                                         Positioned.fill(
                                           child: AnimatedContainer(
