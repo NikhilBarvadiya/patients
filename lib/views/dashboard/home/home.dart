@@ -113,9 +113,11 @@ class Home extends StatelessWidget {
       backgroundColor: Colors.white,
       pinned: true,
       floating: true,
+      centerTitle: false,
       expandedHeight: 120,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
+        centerTitle: false,
         collapseMode: CollapseMode.pin,
         background: Container(color: Colors.white),
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
@@ -208,7 +210,11 @@ class Home extends StatelessWidget {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: [Colors.black.withOpacity(0.6), Colors.transparent], begin: Alignment.bottomCenter, end: Alignment.topCenter),
+                            gradient: LinearGradient(
+                              colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
                           ),
                         ),
                         Positioned(
