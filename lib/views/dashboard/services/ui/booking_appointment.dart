@@ -17,7 +17,7 @@ class BookingAppointment extends StatefulWidget {
 }
 
 class _BookingAppointmentState extends State<BookingAppointment> {
-  final _razorpay = Razorpay();
+  final Razorpay _razorpay = Razorpay();
   String _selectedPaymentMethod = 'online', _selectedBookingType = 'Regular';
   bool _isProcessing = false;
 
@@ -113,7 +113,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
             backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
           ),
           icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: _isProcessing
@@ -381,38 +381,40 @@ class _BookingAppointmentState extends State<BookingAppointment> {
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -2))],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          spacing: 20.0,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Total Amount', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                Text(
-                  '₹${widget.service.charge!.toStringAsFixed(0)}',
-                  style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
-                ),
-              ],
-            ),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: isFormValid ? _processBooking : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF2563EB),
-                  disabledBackgroundColor: Colors.grey[400],
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  _selectedPaymentMethod == 'online' ? 'Pay Now' : 'Confirm Booking',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            spacing: 20.0,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total Amount', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                  Text(
+                    '₹${widget.service.charge!.toStringAsFixed(0)}',
+                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isFormValid ? _processBooking : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF2563EB),
+                    disabledBackgroundColor: Colors.grey[400],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    _selectedPaymentMethod == 'online' ? 'Pay Now' : 'Confirm Booking',
+                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
