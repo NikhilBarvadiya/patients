@@ -239,7 +239,7 @@ class ProfileCtrl extends GetxController {
         isConfirmPasswordVisible.value = false;
         toaster.success('Password updated successfully');
         if (Get.isDialogOpen ?? false) {
-          Get.back();
+          Get.close(1);
         }
       }
     } catch (e) {

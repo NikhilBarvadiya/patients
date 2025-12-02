@@ -656,7 +656,7 @@ class Home extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -669,7 +669,7 @@ class Home extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         ctrl.cancelAppointment(appointmentId);
-                        Get.back();
+                        Get.close(1);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFFEF4444),

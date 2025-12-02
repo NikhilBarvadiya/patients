@@ -754,7 +754,7 @@ class _AppointmentsState extends State<Appointments> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: Get.back,
+                        onPressed: () => Get.close(1),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.grey[700],
                           side: BorderSide(color: Colors.grey[300]!),
@@ -769,7 +769,7 @@ class _AppointmentsState extends State<Appointments> {
                       child: ElevatedButton(
                         onPressed: () {
                           ctrl.cancelAppointment(appointmentId);
-                          Get.back();
+                          Get.close(1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),
@@ -853,7 +853,7 @@ class _AppointmentsState extends State<Appointments> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () => Get.close(1),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.grey[700],
                               side: BorderSide(color: Colors.grey[300]!),

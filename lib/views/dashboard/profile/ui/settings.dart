@@ -33,7 +33,7 @@ class Settings extends StatelessWidget {
                   backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
                 ),
                 icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-                onPressed: () => Get.back(),
+                onPressed: () => Get.close(1),
               ),
             ),
             SliverToBoxAdapter(
@@ -292,7 +292,7 @@ We're here to help you succeed!
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () => Get.close(1),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -373,7 +373,7 @@ We're here to help you succeed!
               backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
             ),
             icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-            onPressed: () => Get.back(),
+            onPressed: () => Get.close(1),
           ),
         ),
         body: SingleChildScrollView(
@@ -422,7 +422,7 @@ We're here to help you succeed!
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -487,7 +487,7 @@ We're here to help you succeed!
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

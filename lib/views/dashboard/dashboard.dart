@@ -80,10 +80,10 @@ class _DashboardState extends State<Dashboard> {
         ),
         content: const Text('Are you sure you want to exit the app?'),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Get.close(1), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
-              Get.back();
+              Get.close(1);
               SystemNavigator.pop();
             },
             style: ElevatedButton.styleFrom(

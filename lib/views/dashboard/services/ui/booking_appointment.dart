@@ -87,7 +87,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
     bool isCheck = await Get.find<AuthService>().createRequests(bookingData);
     if (isCheck == true) {
       Get.find<HomeCtrl>().loadPendingAppointments();
-      Get.back();
+      Get.close(1);
       Get.snackbar(
         'Booking Confirmed! 🎉',
         '${widget.service.name} booked for $_selectedBookingType Doctor\nPayment: ${status == 'completed' ? 'Confirmed' : 'Pending Verification'}',
@@ -113,7 +113,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
             backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
           ),
           icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.close(1),
         ),
       ),
       body: _isProcessing

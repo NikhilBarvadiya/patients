@@ -50,11 +50,16 @@ class AppointmentDetails extends StatelessWidget {
             backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
           ),
           icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.close(1),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: AppTheme.primaryBlue),
+            style: ButtonStyle(
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              padding: const WidgetStatePropertyAll(EdgeInsets.all(8)),
+              backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+            ),
+            icon: Icon(Icons.refresh_rounded, color: Colors.black87),
             onPressed: () {
               if (isHomeAppoint != null) {
                 homeCtrl.loadPendingAppointments();
@@ -63,6 +68,7 @@ class AppointmentDetails extends StatelessWidget {
               }
             },
           ),
+          SizedBox(width: 10),
         ],
       ),
       body: SafeArea(
@@ -585,7 +591,7 @@ class AppointmentDetails extends StatelessWidget {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Get.back(),
+                          onPressed: () => Get.close(1),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.grey[700],
                             side: BorderSide(color: Colors.grey[300]!),
@@ -602,7 +608,7 @@ class AppointmentDetails extends StatelessWidget {
                             onPressed: rating > 0 && !appointmentsCtrl!.isSubmittingReview.value
                                 ? () {
                                     appointmentsCtrl!.submitReview(appointmentId, rating, commentController.text.trim());
-                                    Get.back();
+                                    Get.close(1);
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
@@ -662,7 +668,7 @@ class AppointmentDetails extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: Get.back,
+                        onPressed: () => Get.close(1),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.grey[700],
                           side: BorderSide(color: Colors.grey[300]!),
@@ -681,7 +687,7 @@ class AppointmentDetails extends StatelessWidget {
                           } else {
                             appointmentsCtrl?.cancelAppointment(appointmentId);
                           }
-                          Get.back();
+                          Get.close(1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),

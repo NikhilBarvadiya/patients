@@ -101,7 +101,6 @@ class AppointmentsCtrl extends GetxController {
       final response = await _authService.cancelRequests(requestId: appointmentId);
       if (response != null) {
         filteredAppointments.removeWhere((app) => app.id == appointmentId);
-        Get.back();
         toaster.success("Your appointment has been cancelled successfully");
       } else {
         throw Exception('Failed to cancel appointment');
@@ -124,7 +123,7 @@ class AppointmentsCtrl extends GetxController {
           appointments[index].feedback = feedback;
           filteredAppointments.assignAll(appointments);
         }
-        Get.back();
+        Get.close(1);
         toaster.success("Thank you for your feedback");
       } else {
         throw Exception('Failed to submit review');
