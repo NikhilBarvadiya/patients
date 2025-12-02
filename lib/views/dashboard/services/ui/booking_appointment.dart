@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:patients/utils/decoration.dart';
+import 'package:patients/utils/network/api_config.dart';
+import 'package:patients/utils/toaster.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:patients/views/auth/auth_service.dart';
 import 'package:patients/views/dashboard/home/home_ctrl.dart';
@@ -88,14 +90,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
     if (isCheck == true) {
       Get.find<HomeCtrl>().loadPendingAppointments();
       Get.close(1);
-      Get.snackbar(
-        'Booking Confirmed! 🎉',
-        '${widget.service.name} booked for $_selectedBookingType Doctor\nPayment: ${status == 'completed' ? 'Confirmed' : 'Pending Verification'}',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
-      );
+      toaster.success("Booking Confirmed! 🎉");
     }
     setState(() => _isProcessing = false);
   }
@@ -176,32 +171,192 @@ class _BookingAppointmentState extends State<BookingAppointment> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
-            child: Icon(widget.service.icon, color: const Color(0xFF2563EB), size: 28),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                child: Icon(widget.service.icon, color: const Color(0xFF2563EB), size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.service.name,
+                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '₹${widget.service.charge!.toStringAsFixed(0)}',
+                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
+          if (widget.service.images.isNotEmpty) ...[const SizedBox(height: 12), _buildServiceImages()],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceImages() {
+    return GestureDetector(
+      onTap: () => _showImagesDialog(context),
+      child: Container(
+        height: 130,
+        width: double.infinity,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.grey[100]),
+        child: Stack(
+          children: [
+            if (widget.service.images.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  APIConfig.resourceBaseURL + widget.service.images.first,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            if (widget.service.images.length > 1)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(20)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.photo_library, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${widget.service.images.length}',
+                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.remove_red_eye, size: 12, color: Colors.blue[700]),
+                    const SizedBox(width: 4),
+                    Text(
+                      'View',
+                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.blue[700], fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showImagesDialog(BuildContext context) {
+    if (widget.service.images.isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(20),
+          child: Container(
+            height: 400,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  widget.service.name,
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${widget.service.name} - Images',
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                      ),
+                      IconButton(icon: const Icon(Icons.close, size: 22), onPressed: () => Get.close(1)),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '₹${widget.service.charge!.toStringAsFixed(0)}',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                Expanded(
+                  child: PageView.builder(
+                    itemCount: widget.service.images.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            APIConfig.resourceBaseURL + widget.service.images[index],
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                                    const SizedBox(height: 8),
+                                    Text('Image not available', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                if (widget.service.images.length > 1)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        widget.service.images.length,
+                        (index) => Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: index == 0 ? Colors.blue : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
