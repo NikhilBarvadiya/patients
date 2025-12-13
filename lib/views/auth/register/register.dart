@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:patients/utils/decoration.dart';
 import 'package:patients/views/auth/register/register_ctrl.dart';
@@ -47,7 +48,7 @@ class Register extends StatelessWidget {
                       const SizedBox(height: 32),
                       _buildLabel(context, 'Full Name'),
                       const SizedBox(height: 8),
-                      _buildTextField(controller: ctrl.nameCtrl, hint: 'Enter your full name', icon: Icons.person_outline),
+                      _buildTextField(controller: ctrl.nameCtrl, hint: 'Enter your full name', textCapitalization: TextCapitalization.words, icon: Icons.person_outline),
                       const SizedBox(height: 16),
                       _buildLabel(context, 'Email'),
                       const SizedBox(height: 8),
@@ -68,35 +69,30 @@ class Register extends StatelessWidget {
                       const SizedBox(height: 16),
                       _buildLabel(context, 'Mobile Number'),
                       const SizedBox(height: 8),
-                      _buildTextField(controller: ctrl.mobileCtrl, hint: 'Enter your mobile number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone, maxLength: 10),
+                      _buildTextField(
+                        controller: ctrl.mobileCtrl,
+                        hint: '+91 Enter your mobile number',
+                        icon: Icons.phone_outlined,
+                        maxLength: 10,
+                        keyboardType: TextInputType.phone,
+                        autofillHints: const [AutofillHints.telephoneNumber],
+                        inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\+91')), FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+                      ),
                       const SizedBox(height: 16),
                       _buildLabel(context, 'Address'),
                       const SizedBox(height: 8),
-                      _buildTextField(controller: ctrl.addressCtrl, hint: 'Enter your address', icon: Icons.home_outlined, maxLines: 2),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.info_outline, size: 18, color: decoration.colorScheme.primary),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'By creating an account, you agree to our Terms of Service and Privacy Policy',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280), height: 1.4),
-                              ),
-                            ),
-                          ],
+                      Obx(
+                        () => _buildTextField(
+                          controller: ctrl.addressCtrl,
+                          hint: 'Enter your address',
+                          icon: Icons.home_outlined,
+                          maxLines: 3,
+                          textCapitalization: TextCapitalization.words,
+                          suffixLoading: ctrl.isGettingLocation.value,
+                          suffixIcon: ctrl.isGettingLocation.value ? Icons.location_searching : Icons.location_on,
+                          onSuffixIconTap: ctrl.isGettingLocation.value ? null : ctrl.retryLocation,
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      _buildLocationStatus(ctrl),
                       const SizedBox(height: 16),
                       Obx(
                         () => SizedBox(
@@ -117,6 +113,28 @@ class Register extends StatelessWidget {
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
                                   ),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.info_outline, size: 18, color: decoration.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'By creating an account, you agree to our Terms of Service and Privacy Policy',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280), height: 1.4),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -160,73 +178,6 @@ class Register extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationStatus(RegisterCtrl ctrl) {
-    return Obx(
-      () => Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: ctrl.locationStatus.value.contains('successfully')
-              ? const Color(0xFFD1FAE5)
-              : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
-              ? const Color(0xFFFEE2E2)
-              : const Color(0xFFFEF3C7),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: ctrl.locationStatus.value.contains('successfully')
-                ? const Color(0xFF10B981)
-                : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
-                ? const Color(0xFFEF4444)
-                : const Color(0xFFF59E0B),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              ctrl.locationStatus.value.contains('successfully')
-                  ? Icons.check_circle_rounded
-                  : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
-                  ? Icons.error_outline_rounded
-                  : Icons.location_searching_rounded,
-              color: ctrl.locationStatus.value.contains('successfully')
-                  ? const Color(0xFF10B981)
-                  : ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied')
-                  ? const Color(0xFFEF4444)
-                  : const Color(0xFFF59E0B),
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ctrl.isGettingLocation.value ? 'Getting Location...' : 'Location Status',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF374151)),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    ctrl.locationStatus.value,
-                    style: TextStyle(fontSize: 11, color: const Color(0xFF6B7280), fontWeight: ctrl.locationStatus.value.contains('successfully') ? FontWeight.w600 : FontWeight.normal),
-                  ),
-                ],
-              ),
-            ),
-            if (ctrl.locationStatus.value.contains('Failed') || ctrl.locationStatus.value.contains('denied'))
-              TextButton(
-                onPressed: ctrl.retryLocation,
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
-                child: const Text(
-                  'Retry',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2563EB)),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildLabel(BuildContext context, String text) {
     return Text(
       text,
@@ -240,10 +191,14 @@ class Register extends StatelessWidget {
     required IconData icon,
     TextInputType? keyboardType,
     bool obscureText = false,
+    bool suffixLoading = false,
     IconData? suffixIcon,
     VoidCallback? onSuffixIconTap,
     int? maxLength,
     int maxLines = 1,
+    Iterable<String>? autofillHints,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return TextFormField(
       controller: controller,
@@ -252,15 +207,22 @@ class Register extends StatelessWidget {
       maxLength: maxLength,
       maxLines: maxLines,
       minLines: 1,
+      inputFormatters: inputFormatters,
+      textCapitalization: textCapitalization,
+      autofillHints: autofillHints,
+      style: TextStyle(fontSize: 12, letterSpacing: .5),
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 20, color: decoration.colorScheme.primary),
-        suffixIcon: suffixIcon != null
-            ? IconButton(
-                onPressed: onSuffixIconTap,
-                icon: Icon(suffixIcon, size: 20, color: decoration.colorScheme.primary),
-              ).paddingOnly(right: 5)
+        suffixIcon: suffixIcon != null || suffixLoading
+            ? suffixLoading
+                  ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(decoration.colorScheme.primary))).paddingOnly(right: 15)
+                  : IconButton(
+                      onPressed: onSuffixIconTap,
+                      icon: Icon(suffixIcon, size: 20, color: decoration.colorScheme.primary),
+                    ).paddingOnly(right: 5)
             : null,
+        suffixIconConstraints: suffixLoading == true ? const BoxConstraints(minWidth: 0, minHeight: 0, maxWidth: 50, maxHeight: 24) : null,
         filled: true,
         fillColor: const Color(0xFFF9FAFB),
         counterText: '',
@@ -274,7 +236,7 @@ class Register extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 2),
+          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),

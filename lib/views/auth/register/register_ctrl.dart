@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:patients/utils/routes/route_name.dart';
+import 'package:patients/utils/service/location_service.dart';
 import 'package:patients/utils/toaster.dart';
 import 'package:patients/views/auth/auth_service.dart';
 
@@ -13,9 +13,11 @@ class RegisterCtrl extends GetxController {
   final addressCtrl = TextEditingController();
 
   var isLoading = false.obs, isPasswordVisible = false.obs, isGettingLocation = false.obs;
-  var coordinates = [0.0, 0.0].obs, locationStatus = 'Fetching location...'.obs;
+  var coordinates = [0.0, 0.0].obs;
 
   AuthService get authService => Get.find<AuthService>();
+
+  LocationService get locationService => Get.find<LocationService>();
 
   void togglePasswordVisibility() => isPasswordVisible.toggle();
 
@@ -36,43 +38,18 @@ class RegisterCtrl extends GetxController {
   }
 
   Future<void> _fetchCurrentLocation() async {
-    isGettingLocation.value = true;
-    locationStatus.value = 'Checking location permissions...';
-
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        locationStatus.value = 'Location services disabled';
-        toaster.warning('Please enable location services for better experience');
-        isGettingLocation.value = false;
-        return;
+      isGettingLocation(true);
+      final addressData = await locationService.getCurrentAddress();
+      if (addressData != null) {
+        addressCtrl.text = addressData['address'] ?? '';
+        coordinates.value = [addressData['latitude'] ?? 0.0, addressData['longitude'] ?? 0.0];
+        toaster.success('Location fetched successfully');
       }
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        locationStatus.value = 'Requesting location permission...';
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          locationStatus.value = 'Location permission denied';
-          toaster.warning('Location permission is required for better service');
-          isGettingLocation.value = false;
-          return;
-        }
-      }
-      if (permission == LocationPermission.deniedForever) {
-        locationStatus.value = 'Location permission permanently denied';
-        toaster.warning('Please enable location permissions in app settings');
-        isGettingLocation.value = false;
-        return;
-      }
-      locationStatus.value = 'Getting your location...';
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 15));
-      coordinates.value = [position.latitude, position.longitude];
-      locationStatus.value = 'Location fetched successfully!';
     } catch (e) {
-      locationStatus.value = 'Failed to get location';
-      toaster.error('Location error: ${e.toString()}');
+      toaster.error('Failed to fetch location: ${e.toString()}');
     } finally {
-      isGettingLocation.value = false;
+      isGettingLocation(false);
     }
   }
 
@@ -94,11 +71,6 @@ class RegisterCtrl extends GetxController {
     } catch (e) {
       toaster.error("Registration failed: ${e.toString()}");
     } finally {
-      nameCtrl.clear();
-      emailCtrl.clear();
-      passwordCtrl.clear();
-      mobileCtrl.clear();
-      addressCtrl.clear();
       isLoading.value = false;
     }
   }

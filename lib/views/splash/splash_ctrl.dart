@@ -13,7 +13,10 @@ class SplashCtrl extends GetxController {
   void _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
     final token = await read(AppSession.token);
-    if (token != null && token != "") {
+    final userData = await read(AppSession.userData);
+    if (userData != null && userData["isEmailVerified"] != true) {
+      Get.offAllNamed(AppRouteNames.login);
+    } else if (token != null && token != "") {
       Get.offAllNamed(AppRouteNames.dashboard);
     } else {
       Get.offAllNamed(AppRouteNames.login);

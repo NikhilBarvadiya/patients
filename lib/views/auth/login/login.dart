@@ -67,7 +67,7 @@ class Login extends StatelessWidget {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 2),
+                          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 1),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
@@ -100,7 +100,7 @@ class Login extends StatelessWidget {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 2),
+                          borderSide: BorderSide(color: decoration.colorScheme.primary, width: 1),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
