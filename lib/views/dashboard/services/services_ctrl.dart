@@ -29,16 +29,11 @@ class ServicesCtrl extends GetxController {
         if (!hasMore.value || isLoadMoreLoading.value) return;
         isLoadMoreLoading.value = true;
       }
-      await _authService.getRequests(page: currentPage.value);
       final response = await _authService.patientServices(page: currentPage.value, search: searchQuery.value);
       if (response != null && response['docs'] is List) {
         final List newServices = response['docs'];
         if (newServices.isNotEmpty) {
-          // final parsedServices = newServices.map((item) => ServiceModel.fromJson(item)).toList();
-          final parsedServices = newServices.map((item) {
-            item["images"] = ["https://example.com/image1.jpg", "https://example.com/image2.jpg"];
-            return ServiceModel.fromJson(item);
-          }).toList();
+          final parsedServices = newServices.map((item) => ServiceModel.fromJson(item)).toList();
           if (loadMore) {
             services.addAll(parsedServices);
           } else {

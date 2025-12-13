@@ -44,7 +44,10 @@ class HomeCtrl extends GetxController {
   Future<void> loadPendingAppointments() async {
     try {
       isAppointmentLoading.value = true;
-      final response = await _authService.getRequests(status: 'Pending', page: 1);
+      final params = <String, String>{'page': "1", 'limit': '5'};
+      params['status'] = "Pending";
+      final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+      final response = await _authService.getRequests(queryString: queryString);
       if (response != null && response['docs'] is List) {
         final List appointmentsData = response['docs'];
         pendingAppointments.assignAll(appointmentsData.map((item) => PatientRequestModel.fromJson(item)).toList());

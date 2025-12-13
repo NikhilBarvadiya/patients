@@ -9,6 +9,7 @@ class Services extends StatelessWidget {
   Services({super.key});
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -16,6 +17,7 @@ class Services extends StatelessWidget {
     return GetBuilder<ServicesCtrl>(
       init: ServicesCtrl(),
       builder: (ctrl) {
+        _focusNode.requestFocus();
         scrollController.addListener(() {
           if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
             ctrl.loadMoreServices();
@@ -72,6 +74,7 @@ class Services extends StatelessWidget {
                         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: TextField(
+                        focusNode: _focusNode,
                         controller: searchController,
                         decoration: InputDecoration(
                           hintText: 'Search services...',

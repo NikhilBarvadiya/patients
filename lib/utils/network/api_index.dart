@@ -18,6 +18,7 @@ class APIIndex {
   /// Service
   static const String patientServices = 'services';
   static const String createRequests = 'patient/requests/create';
+  static const String createPaymentRequests = 'patient/requests/create/payment';
   static const String getRequests = 'patient/requests/get';
   static const String cancelRequests = 'patient/requests/cancel';
   static const String submitFeedback = 'patient/feedback/submit';

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:patients/models/target_model.dart';
 import 'package:patients/utils/decoration.dart';
+import 'package:patients/utils/theme/light.dart';
 import 'package:patients/views/dashboard/profile/ui/settings.dart';
 import 'package:patients/views/dashboard/reward/reward.dart';
 import 'package:patients/views/dashboard/target/target.dart';
@@ -658,6 +659,8 @@ class Home extends StatelessWidget {
   }
 
   Widget _buildAppointmentCard(PatientRequestModel appointment) {
+    final hasMultipleDoctors = appointment.doctors.length > 1;
+    final primaryDoctor = appointment.doctors.isNotEmpty ? appointment.doctors.first : null;
     return Container(
       width: Get.width - 60,
       margin: const EdgeInsets.only(right: 15),
@@ -693,11 +696,48 @@ class Home extends StatelessWidget {
                             style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            appointment.therapistName.toString(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline_rounded, size: 14, color: Colors.grey.shade600),
+                              const SizedBox(width: 2),
+                              if (appointment.doctors.isEmpty)
+                                Expanded(
+                                  child: Text('No doctor assigned', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600)),
+                                ),
+                              if (!hasMultipleDoctors)
+                                Expanded(
+                                  child: Text(
+                                    _getDoctorName(primaryDoctor!),
+                                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              if (appointment.doctors.isNotEmpty && hasMultipleDoctors)
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _getDoctorName(primaryDoctor!),
+                                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 4, right: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                        child: Text(
+                                          '+${appointment.doctors.length - 1} more',
+                                          style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -716,6 +756,15 @@ class Home extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getDoctorName(Doctor doctor) {
+    if (doctor.doctorId is String) {
+      return doctor.doctorId;
+    } else if (doctor.doctorId is Map) {
+      return doctor.doctorId['name']?.toString() ?? 'Doctor';
+    }
+    return 'Doctor';
   }
 
   Widget _buildDetailRow(PatientRequestModel appointment) {

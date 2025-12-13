@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,9 +30,8 @@ class AppointmentDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(appointment.status);
-    final formattedDate = DateFormat('dd MMM yyyy').format(appointment.requestedAt);
-    final formattedTime = DateFormat('hh:mm a').format(appointment.requestedAt);
-
+    final formattedDate = DateFormat('dd MMM yyyy').format(appointment.updatedAt.toLocal());
+    final formattedTime = DateFormat('hh:mm a').format(appointment.updatedAt.toLocal());
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -52,24 +50,6 @@ class AppointmentDetails extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
           onPressed: () => Get.close(1),
         ),
-        actions: [
-          IconButton(
-            style: ButtonStyle(
-              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              padding: const WidgetStatePropertyAll(EdgeInsets.all(8)),
-              backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
-            ),
-            icon: Icon(Icons.refresh_rounded, color: Colors.black87),
-            onPressed: () {
-              if (isHomeAppoint != null) {
-                homeCtrl.loadPendingAppointments();
-              } else {
-                appointmentsCtrl?.refreshAppointments();
-              }
-            },
-          ),
-          SizedBox(width: 10),
-        ],
       ),
       body: SafeArea(
         child: Stack(
@@ -164,41 +144,55 @@ class AppointmentDetails extends StatelessWidget {
       ),
       child: Column(
         children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 20),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            appointment.serviceName,
+            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${appointment.preferredType} Specialist',
+            style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black87),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 5),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.medical_services_rounded, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: Colors.amber.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                child: Row(
                   children: [
+                    const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
                     Text(
-                      appointment.serviceName,
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      "Service Rating : ${appointment.rating > 0 ? appointment.rating.toString() : '4.8'}",
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.amber.shade800),
                     ),
-                    const SizedBox(height: 4),
-                    Text(appointment.therapistName, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(_getStatusIcon(appointment.status), size: 16, color: statusColor),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
                       appointment.status.toUpperCase(),
                       style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: statusColor, letterSpacing: 0.5),
@@ -208,59 +202,8 @@ class AppointmentDetails extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              spacing: 10.0,
-              children: [
-                Expanded(child: _buildInfoItem(Icons.calendar_today_rounded, 'Date', formattedDate)),
-                Expanded(child: _buildInfoItem(Icons.access_time_rounded, 'Time', formattedTime)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              spacing: 10.0,
-              children: [
-                Expanded(child: _buildInfoItem(Icons.currency_rupee_rounded, 'Fee', '₹${appointment.charge} (${appointment.paymentStatus.capitalizeFirst.toString()})')),
-                Expanded(child: _buildInfoItem(Icons.payment_rounded, 'Payment Type', appointment.paymentType.capitalizeFirst.toString())),
-              ],
-            ),
-          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoItem(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -276,83 +219,67 @@ class AppointmentDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Doctor Information',
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(color: Colors.amber.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Row(
-                  children: [
-                    const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      appointment.rating > 0 ? appointment.rating.toString() : '4.8',
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.amber.shade800),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            'Assigned Doctors',
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2), width: 2),
-                ),
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: 'https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg',
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child: Icon(Icons.person, color: Colors.grey[400], size: 40),
-                    ),
+          const SizedBox(height: 8),
+          ...appointment.doctors.map((doctor) {
+            String otherDoctorName = 'Doctor';
+            if (doctor.doctorId is Map<String, dynamic>) {
+              final doctorData = doctor.doctorId as Map<String, dynamic>;
+              otherDoctorName = doctorData['name']?.toString() ?? 'Doctor';
+            } else if (doctor.doctorId is String) {
+              otherDoctorName = doctor.doctorId;
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
+                    child: const Icon(Icons.person_outline_rounded, size: 18, color: Colors.grey),
                   ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      appointment.therapistName,
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${appointment.preferredType} Specialist',
-                      style: GoogleFonts.poppins(fontSize: 14, color: AppTheme.primaryBlue, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 4),
-                    Text('${appointment.serviceName} Expert', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
-                    const SizedBox(height: 8),
-                    Row(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      spacing: 4.0,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.work_outline_rounded, size: 16, color: Colors.grey[500]),
-                        const SizedBox(width: 4),
-                        Text('5+ years experience', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                        Text(otherDoctorName, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade700)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(color: Colors.amber.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Doctor Rating : ${doctor.rating > 0 ? doctor.rating.toString() : '0.8'}",
+                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.amber.shade800),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  if (doctor.isSend)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                      child: Text(
+                        'Accepted',
+                        style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF10B981)),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            );
+          }),
         ],
       ),
     );

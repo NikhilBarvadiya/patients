@@ -15,6 +15,7 @@ class PatientRequestModel {
   String feedback;
   String paymentType;
   String paymentStatus;
+  Map<String, dynamic>? payment;
 
   PatientRequestModel({
     required this.id,
@@ -33,6 +34,7 @@ class PatientRequestModel {
     required this.feedback,
     required this.paymentType,
     required this.paymentStatus,
+    this.payment,
   });
 
   factory PatientRequestModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +55,7 @@ class PatientRequestModel {
       feedback: json['feedback'] ?? '',
       paymentType: json['payment']?["paymentMethod"] ?? 'offline',
       paymentStatus: json['payment']?["status"] ?? 'unPaid',
+      payment: json['payment'] != null ? Map<String, dynamic>.from(json['payment']) : null,
     );
   }
 
@@ -60,9 +63,23 @@ class PatientRequestModel {
 
   double get price => charge.toDouble();
 
-  String get therapistName => doctors.isNotEmpty ? 'Dr. ${doctors.first.doctorId}' : 'Doctor not assigned';
-
   String get patientNotes => feedback;
+
+  bool get hasMultipleDoctors => doctors.length > 1;
+
+  Doctor? get acceptedDoctor {
+    for (final doc in doctors) {
+      if (doc.isSend == true) {
+        return doc;
+      }
+    }
+    return doctors.isNotEmpty ? doctors.first : null;
+  }
+
+  String get assignedDoctorsCount {
+    if (doctors.isEmpty) return 'No doctors';
+    return '${doctors.length} ${doctors.length == 1 ? 'doctor' : 'doctors'} assigned';
+  }
 }
 
 class Doctor {
@@ -75,7 +92,16 @@ class Doctor {
   Doctor({required this.doctorId, required this.rating, required this.isSend, required this.fcmToken, required this.id});
 
   factory Doctor.fromJson(Map<String, dynamic> json) {
-    return Doctor(doctorId: json['id']?['name'] ?? '', rating: json['rating'] ?? 0, isSend: json['isSend'] ?? false, fcmToken: json['fcmToken'] ?? '', id: json['_id'] ?? '');
+    return Doctor(doctorId: json['id'] ?? '', rating: json['rating'] ?? 0, isSend: json['isSend'] ?? false, fcmToken: json['fcmToken'] ?? '', id: json['_id'] ?? '');
+  }
+
+  String get name {
+    if (doctorId is String) {
+      return doctorId;
+    } else if (doctorId is Map) {
+      return doctorId['name']?.toString() ?? 'Doctor';
+    }
+    return 'Doctor';
   }
 }
 

@@ -142,11 +142,25 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<bool> createRequests(Map<String, dynamic> request) async {
+  Future<dynamic> createRequests(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.createRequests, request, ApiType.post);
       if (!response.success) {
         toaster.warning(response.message ?? 'Failed to requests booking');
+        return null;
+      }
+      return response.data;
+    } catch (err) {
+      toaster.error('Network error: ${err.toString()}');
+      return null;
+    }
+  }
+
+  Future<bool> createPaymentRequests(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.createPaymentRequests, request, ApiType.post);
+      if (!response.success) {
+        toaster.warning(response.message ?? 'Failed to requests payment');
         return false;
       }
       return true;
@@ -156,9 +170,9 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<dynamic> getRequests({int page = 1, String status = ""}) async {
+  Future<dynamic> getRequests({required String queryString}) async {
     try {
-      final response = await ApiManager().call("${APIIndex.getRequests}?page=$page&limit=10&status=$status", {}, ApiType.get);
+      final response = await ApiManager().call("${APIIndex.getRequests}?$queryString", {}, ApiType.get);
       if (!response.success || response.data == null) return [];
       return response.data;
     } catch (err) {

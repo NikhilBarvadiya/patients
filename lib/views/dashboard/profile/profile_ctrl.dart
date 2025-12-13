@@ -11,6 +11,7 @@ import 'package:patients/utils/storage.dart';
 import 'package:patients/utils/toaster.dart';
 import 'package:patients/views/auth/auth_service.dart';
 import 'package:patients/views/dashboard/home/home_ctrl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileCtrl extends GetxController {
   var user = UserModel(
@@ -284,6 +285,26 @@ class ProfileCtrl extends GetxController {
       update();
     } catch (e) {
       Get.snackbar('Error', 'Failed to logout: $e', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  Future<void> openPrivacyPolicy() async {
+    try {
+      final url = "https://sites.google.com/view/healup-privacy-policy/home";
+      final uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      toaster.error('Error: $e');
+    }
+  }
+
+  void openTermsOfService() async {
+    try {
+      final url = "https://itfuturz.in/support/healup-patient-support.html";
+      final uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      toaster.error('Error: $e');
     }
   }
 

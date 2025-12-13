@@ -20,7 +20,7 @@ class BookingAppointment extends StatefulWidget {
 
 class _BookingAppointmentState extends State<BookingAppointment> {
   final _razorpay = Razorpay();
-  String _selectedPaymentMethod = 'online', _selectedBookingType = 'Regular';
+  String requestId = "", _selectedPaymentMethod = 'online', _selectedBookingType = 'Regular';
   bool _isProcessing = false;
 
   @override
@@ -38,8 +38,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    setState(() => _isProcessing = false);
-    _confirmBooking(response.paymentId ?? 'N/A', 'paid');
+    _confirmPayment(response.paymentId);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -70,29 +69,39 @@ class _BookingAppointmentState extends State<BookingAppointment> {
     }
   }
 
-  void _processBooking() {
-    if (_selectedPaymentMethod == 'online') {
-      setState(() => _isProcessing = true);
-      _initiateRazorpayPayment();
-    } else {
-      _confirmBooking('OFFLINE_${DateTime.now().millisecondsSinceEpoch}', 'paid');
-    }
+  Future<void> _confirmPayment(transactionId) async {
+    await Get.find<AuthService>().createPaymentRequests({
+      "requestId": requestId,
+      'service': widget.service.name,
+      'amount': widget.service.charge,
+      'paymentMethod': _selectedPaymentMethod,
+      'transactionId': transactionId,
+      'status': 'paid',
+    });
+    Get.find<HomeCtrl>().loadPendingAppointments();
+    Get.close(1);
+    toaster.success("Booking Confirmed! 🎉");
+    setState(() => _isProcessing = false);
   }
 
-  Future<void> _confirmBooking(String transactionId, String status) async {
-    setState(() => _isProcessing = true);
-    final bookingData = {
-      'serviceId': widget.service.id,
-      'preferredType': _selectedBookingType,
-      'payment': {'service': widget.service.name, 'amount': widget.service.charge, 'paymentMethod': _selectedPaymentMethod, 'transactionId': transactionId, 'status': status},
-    };
-    bool isCheck = await Get.find<AuthService>().createRequests(bookingData);
-    if (isCheck == true) {
-      Get.find<HomeCtrl>().loadPendingAppointments();
-      Get.close(1);
-      toaster.success("Booking Confirmed! 🎉");
+  Future<void> _confirmBooking() async {
+    try {
+      setState(() => _isProcessing = true);
+      final bookingData = {'serviceId': widget.service.id, 'preferredType': _selectedBookingType};
+      final response = await Get.find<AuthService>().createRequests(bookingData);
+      if (response != null && response["request"] != null) {
+        if (_selectedPaymentMethod == 'online') {
+          requestId = response["request"]["_id"];
+          _initiateRazorpayPayment();
+        } else {
+          Get.find<HomeCtrl>().loadPendingAppointments();
+          Get.close(1);
+          toaster.success("Booking Confirmed! 🎉");
+        }
+      }
+    } finally {
+      setState(() => _isProcessing = false);
     }
-    setState(() => _isProcessing = false);
   }
 
   @override
@@ -554,7 +563,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
             ),
             Expanded(
               child: ElevatedButton(
-                onPressed: isFormValid ? _processBooking : null,
+                onPressed: isFormValid ? _confirmBooking : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF2563EB),
                   disabledBackgroundColor: Colors.grey[400],

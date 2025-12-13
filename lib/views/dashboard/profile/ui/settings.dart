@@ -135,23 +135,6 @@ We're here to help you succeed!
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader('About'),
-                    const SizedBox(height: 16),
-                    _buildSettingsCard(
-                      children: [
-                        _buildSettingsTile(icon: Icons.info_outline, title: 'Version', subtitle: '1.0.0 (Build 123)', onTap: () {}),
-                        _buildDivider(),
-                        _buildSettingsTile(
-                          icon: Icons.update_outlined,
-                          title: 'Check for Updates',
-                          subtitle: 'Latest version available',
-                          onTap: () {
-                            Get.snackbar('Update Check', 'You have the latest version', snackPosition: SnackPosition.BOTTOM);
-                          },
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 40),
                     _buildAppFooter(),
                   ],
@@ -213,7 +196,7 @@ We're here to help you succeed!
       child: Column(
         children: [
           Text(
-            'Therapist App',
+            'Patients App',
             style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[600]),
           ),
           const SizedBox(height: 4),
