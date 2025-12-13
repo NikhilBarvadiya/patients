@@ -60,6 +60,20 @@ class AuthService extends GetxService {
     }
   }
 
+  Future<dynamic> forgotPassword(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.forgotPassword, request, ApiType.post);
+      if (!response.success) {
+        toaster.warning(response.message ?? 'Failed to send reset link');
+        return null;
+      }
+      return true;
+    } catch (err) {
+      toaster.error(err.toString());
+      return null;
+    }
+  }
+
   Future<void> register(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.register, request, ApiType.post);

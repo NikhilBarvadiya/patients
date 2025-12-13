@@ -113,6 +113,7 @@ class ProfileCtrl extends GetxController {
   }
 
   void _parseUserData(Map<String, dynamic> data) {
+    List coordinates = data['location']['coordinates'] ?? [];
     user.value = UserModel(
       id: data['_id'] ?? '',
       name: data['name'] ?? '',
@@ -123,7 +124,7 @@ class ProfileCtrl extends GetxController {
       avatar: data['avatar'] ?? '',
       location: LocationModel(
         address: data['location'] != null ? data['location']['address'] ?? '' : '',
-        coordinates: data['location'] != null ? List<double>.from(data['location']['coordinates'] ?? [0.0, 0.0]) : [0.0, 0.0],
+        coordinates: data['location'] != null ? List<double>.from([double.tryParse(coordinates.first.toString()) ?? 0.0, double.tryParse(coordinates.last.toString()) ?? 0.0]) : [0.0, 0.0],
       ),
     );
   }
@@ -176,7 +177,7 @@ class ProfileCtrl extends GetxController {
         'email': emailController.text.trim(),
         'mobile': mobileController.text.trim(),
         'address': user.value.location.address,
-        'coordinates': user.value.location.coordinates.first,
+        'coordinates': user.value.location.coordinates,
       };
       dio.FormData formData = dio.FormData.fromMap(request);
       final response = await _authService.updateProfile(formData);

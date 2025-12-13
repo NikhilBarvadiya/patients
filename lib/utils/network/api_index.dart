@@ -7,6 +7,10 @@ class APIIndex {
   static const String otpSend = 'patient/otp/send';
   static const String otpVerify = 'patient/otp/verify';
 
+  /// Forgot Password
+  static const String forgotPassword = 'patient/forgot-password';
+
+  /// Profile
   static const String getProfile = 'patient/get-profile';
   static const String updateProfile = 'patient/update-profile';
   static const String updatePassword = 'patient/change-password';
