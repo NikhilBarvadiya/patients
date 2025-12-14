@@ -177,6 +177,7 @@ class _AppointmentsState extends State<Appointments> {
       child: SizedBox(
         height: 50,
         child: ListView.builder(
+          shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: ctrl.filters.length,
@@ -196,7 +197,7 @@ class _AppointmentsState extends State<Appointments> {
       avatar: isSelected ? null : Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.grey[600]),
       label: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.grey[700]),
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.grey[700]),
       ),
       selected: isSelected,
       onSelected: (selected) => ctrl.changeFilter(label),
@@ -235,6 +236,7 @@ class _AppointmentsState extends State<Appointments> {
       child: SizedBox(
         height: 50,
         child: ListView.builder(
+          shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: ctrl.paymentMethods.length,
@@ -254,7 +256,7 @@ class _AppointmentsState extends State<Appointments> {
       avatar: isSelected ? null : Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.grey[600]),
       label: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.grey[700]),
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.grey[700]),
       ),
       selected: isSelected,
       onSelected: (selected) => ctrl.changePaymentMethod(label),

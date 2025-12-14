@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart' as path;
 import 'package:patients/models/user_model.dart';
 import 'package:patients/utils/config/session.dart';
-import 'package:patients/utils/helper.dart';
 import 'package:patients/utils/storage.dart';
 import 'package:patients/utils/toaster.dart';
 import 'package:patients/views/auth/auth_service.dart';
@@ -28,13 +25,6 @@ class ProfileCtrl extends GetxController {
   var isCurrentPasswordVisible = false.obs, isNewPasswordVisible = false.obs, isConfirmPasswordVisible = false.obs;
   var coordinates = [0.0, 0.0].obs, locationStatus = 'Fetching location...'.obs;
 
-  bool isEditMode = false;
-  var avatar = Rx<File?>(null);
-
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController mobileController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
   final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -98,16 +88,15 @@ class ProfileCtrl extends GetxController {
       final response = await _authService.getProfile();
       if (response != null) {
         _parseUserData(response);
-        _updateControllers();
         await write(AppSession.userData, response);
         final dashboardCtrl = Get.find<HomeCtrl>();
         dashboardCtrl.loadUserData();
       } else {
-        await _loadLocalData();
+        await loadLocalData();
       }
     } catch (e) {
       toaster.error('Error loading profile: ${e.toString()}');
-      await _loadLocalData();
+      await loadLocalData();
     } finally {
       isLoading.value = false;
     }
@@ -130,19 +119,11 @@ class ProfileCtrl extends GetxController {
     );
   }
 
-  Future<void> _loadLocalData() async {
+  Future<void> loadLocalData() async {
     final userData = await read(AppSession.userData);
     if (userData != null) {
       _parseUserData(userData);
-      _updateControllers();
     }
-  }
-
-  void _updateControllers() {
-    nameController.text = user.value.name;
-    emailController.text = user.value.email;
-    mobileController.text = user.value.mobile;
-    addressController.text = user.value.address;
   }
 
   void toggleCurrentPasswordVisibility() => isCurrentPasswordVisible.toggle();
@@ -150,81 +131,6 @@ class ProfileCtrl extends GetxController {
   void toggleNewPasswordVisibility() => isNewPasswordVisible.toggle();
 
   void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.toggle();
-
-  void toggleEditMode() {
-    isEditMode = !isEditMode;
-    if (!isEditMode) {
-      _updateControllers();
-    }
-    update();
-  }
-
-  Future<void> pickAvatar() async {
-    final result = await helper.pickImage();
-    if (result != null) {
-      avatar.value = result;
-      dio.FormData formData = dio.FormData.fromMap({});
-      formData.files.add(MapEntry('profileImage', await dio.MultipartFile.fromFile(avatar.value!.path, filename: path.basename(avatar.value!.path))));
-      await _authService.updateProfile(formData);
-    }
-  }
-
-  Future<void> saveProfile() async {
-    if (!_validateForm()) return;
-    try {
-      isSaving.value = true;
-      final request = {
-        'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
-        'mobile': mobileController.text.trim(),
-        'address': user.value.location.address,
-        'coordinates': user.value.location.coordinates,
-      };
-      dio.FormData formData = dio.FormData.fromMap(request);
-      final response = await _authService.updateProfile(formData);
-      if (response != null) {
-        await write(AppSession.userData, response);
-        _loadLocalData();
-        isEditMode = false;
-        toaster.success('Profile updated successfully');
-        final dashboardCtrl = Get.find<HomeCtrl>();
-        dashboardCtrl.loadUserData();
-      }
-    } catch (e) {
-      toaster.error('Error updating profile: ${e.toString()}');
-    } finally {
-      isSaving.value = false;
-      update();
-    }
-  }
-
-  bool _validateForm() {
-    if (nameController.text.isEmpty) {
-      toaster.warning('Please enter your full name');
-      return false;
-    }
-    if (emailController.text.isEmpty) {
-      toaster.warning('Please enter your email');
-      return false;
-    }
-    if (!GetUtils.isEmail(emailController.text)) {
-      toaster.warning('Please enter a valid email');
-      return false;
-    }
-    if (mobileController.text.isEmpty) {
-      toaster.warning('Please enter your mobile number');
-      return false;
-    }
-    if (!GetUtils.isPhoneNumber(mobileController.text)) {
-      toaster.warning('Please enter a valid mobile number');
-      return false;
-    }
-    if (addressController.text.isEmpty) {
-      toaster.warning('Please enter your address');
-      return false;
-    }
-    return true;
-  }
 
   Future<void> changePassword() async {
     if (!_validatePasswordForm()) return;
