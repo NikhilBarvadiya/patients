@@ -15,6 +15,11 @@ class APIIndex {
   static const String updateProfile = 'patient/update-profile';
   static const String updatePassword = 'patient/change-password';
 
+  /// Rewards
+  static const String getRewards = 'rewards';
+  static const String getPoints = 'patient/get-points';
+  static const String getPointHistory = 'patient/points/history';
+
   /// Service
   static const String patientServices = 'services';
   static const String createRequests = 'patient/requests/create';

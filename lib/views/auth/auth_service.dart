@@ -208,4 +208,42 @@ class AuthService extends GetxService {
       return null;
     }
   }
+
+  Future<int> getPointsBalance() async {
+    try {
+      final response = await ApiManager().call(APIIndex.getPoints, {}, ApiType.get);
+      if (!response.success || response.data == null) {
+        toaster.warning(response.message ?? 'Failed to load points');
+        return 0;
+      }
+      return int.tryParse(response.data["points"].toString()) ?? 0;
+    } catch (err) {
+      toaster.error('Failed to load points balance');
+      return 0;
+    }
+  }
+
+  Future<dynamic> getRewards({int page = 1}) async {
+    try {
+      final response = await ApiManager().call("${APIIndex.getRewards}?page=$page&limit=10", {}, ApiType.get);
+      if (!response.success || response.data == null) return [];
+      return response.data;
+    } catch (err) {
+      toaster.error(err.toString());
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> getPointHistory({int page = 1}) async {
+    try {
+      final response = await ApiManager().call("${APIIndex.getPointHistory}?page=$page&limit=10", {}, ApiType.get);
+      if (!response.success || response.data == null) {
+        return null;
+      }
+      return response.data;
+    } catch (err) {
+      toaster.error('Failed to load point history');
+      return null;
+    }
+  }
 }

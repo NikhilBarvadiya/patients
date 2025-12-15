@@ -23,6 +23,15 @@ class _BookingAppointmentState extends State<BookingAppointment> {
   String requestId = "", _selectedPaymentMethod = 'online', _selectedBookingType = 'Regular';
   bool _isProcessing = false;
 
+  double get _discountedAmount {
+    final points = widget.service.points ?? 0;
+    if (points == 0) return widget.service.charge?.toDouble() ?? 0.0;
+    final discount = points / 10.0;
+    return (widget.service.charge?.toDouble() ?? 0.0) - discount;
+  }
+
+  double get _discountAmount => (widget.service.points ?? 0) / 10.0;
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +62,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
   Future<void> _initiateRazorpayPayment() async {
     final options = {
       'key': 'rzp_test_RHRLTvT4Rm3WOP',
-      'amount': (widget.service.charge! * 100).toInt(),
+      'amount': (_discountedAmount * 100).toInt(),
       'name': 'PhysioCare Clinic',
       'description': widget.service.name,
       'prefill': {'contact': '9876543210', 'email': 'patient@example.com'},
@@ -73,7 +82,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
     await Get.find<AuthService>().createPaymentRequests({
       "requestId": requestId,
       'service': widget.service.name,
-      'amount': widget.service.charge,
+      'amount': _discountedAmount,
       'paymentMethod': _selectedPaymentMethod,
       'transactionId': transactionId,
       'status': 'paid',
@@ -173,6 +182,7 @@ class _BookingAppointmentState extends State<BookingAppointment> {
   }
 
   Widget _buildServiceInfo() {
+    final points = widget.service.points ?? 0;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -199,10 +209,34 @@ class _BookingAppointmentState extends State<BookingAppointment> {
                       style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '₹${widget.service.charge!.toStringAsFixed(0)}',
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                    Row(
+                      children: [
+                        Text(
+                          '₹${widget.service.charge!.toStringAsFixed(0)}',
+                          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                        ),
+                        if (points > 0) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '₹${_discountedAmount.toStringAsFixed(0)}',
+                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green.shade600),
+                          ),
+                        ],
+                      ],
                     ),
+                    if (points > 0) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber.shade600, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Reward: $points points = ₹${_discountAmount.toStringAsFixed(0)} off',
+                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.amber.shade600, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -556,9 +590,14 @@ class _BookingAppointmentState extends State<BookingAppointment> {
               children: [
                 Text('Total Amount', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
                 Text(
-                  '₹${widget.service.charge!.toStringAsFixed(0)}',
+                  '₹${_discountedAmount.toStringAsFixed(0)}',
                   style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
                 ),
+                if ((widget.service.points ?? 0) > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text('After ₹${_discountAmount.toStringAsFixed(0)} reward discount', style: GoogleFonts.poppins(fontSize: 10, color: Colors.amber.shade600)),
+                  ),
               ],
             ),
             Expanded(

@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:patients/models/reward_model.dart';
+import 'package:patients/models/service_model.dart';
 import 'package:patients/views/dashboard/reward/reward_ctrl.dart';
+import 'package:patients/views/dashboard/services/ui/booking_appointment.dart';
 import 'package:shimmer/shimmer.dart';
 
 class Rewards extends StatefulWidget {
@@ -13,18 +15,32 @@ class Rewards extends StatefulWidget {
   State<Rewards> createState() => _RewardsState();
 }
 
-class _RewardsState extends State<Rewards> {
+class _RewardsState extends State<Rewards> with SingleTickerProviderStateMixin {
   final RewardCtrl rewardCtrl = Get.put(RewardCtrl());
   final ScrollController _scrollController = ScrollController();
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (rewardCtrl.availableRewards.isEmpty) {
+    _tabController = TabController(length: 2, vsync: this);
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (rewardCtrl.hasMore && !rewardCtrl.isLoadingMore) {
         rewardCtrl.loadRewards();
       }
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,6 +70,7 @@ class _RewardsState extends State<Rewards> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TabBar(
+                    controller: _tabController,
                     dividerColor: Colors.transparent,
                     tabs: const [
                       Tab(
@@ -77,7 +94,7 @@ class _RewardsState extends State<Rewards> {
             ),
           ),
         ),
-        body: TabBarView(children: [_buildRewardsTab(), _buildHistoryTab()]),
+        body: TabBarView(controller: _tabController, children: [_buildRewardsTab(), _buildHistoryTab()]),
       ),
     );
   }
@@ -85,7 +102,7 @@ class _RewardsState extends State<Rewards> {
   Widget _buildRewardsTab() {
     return RefreshIndicator(
       onRefresh: () async {
-        await rewardCtrl.loadRewards();
+        await rewardCtrl.loadRewards(reset: true);
       },
       child: SingleChildScrollView(
         controller: _scrollController,
@@ -93,14 +110,12 @@ class _RewardsState extends State<Rewards> {
         child: Column(
           children: [
             _buildEnhancedPointsCard(),
-            const SizedBox(height: 10),
-            _buildEnhancedCategoryFilter(),
             const SizedBox(height: 20),
             Obx(() {
               if (rewardCtrl.isLoading) {
                 return _buildShimmerGrid();
               }
-              final filteredRewards = rewardCtrl.filteredRewards;
+              final filteredRewards = rewardCtrl.availableRewards;
               if (filteredRewards.isEmpty) {
                 return _buildEmptyRewardsState();
               }
@@ -154,63 +169,45 @@ class _RewardsState extends State<Rewards> {
         boxShadow: [BoxShadow(color: Get.theme.colorScheme.primary.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 8), spreadRadius: 1)],
       ),
       child: Obx(() {
-        final balance = rewardCtrl.pointsBalance;
-        final stats = rewardCtrl.getRewardStats();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Text(
+                  'Available Points',
+                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Available Points',
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                      rewardCtrl.pointsBalance.toString(),
+                      style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w700, color: Colors.white, height: 0.9),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          balance.availablePoints.toString(),
-                          style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w700, color: Colors.white, height: 0.9),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-                          child: Text(
-                            'Points',
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                      child: Text(
+                        'Points',
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                      ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
-                  ),
-                  child: const Icon(Icons.star_rounded, color: Colors.white, size: 34),
-                ),
               ],
             ),
-            const SizedBox(height: 24),
-            Container(height: 1, color: Colors.white.withOpacity(0.2)),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildEnhancedMiniStat(icon: Icons.trending_up_rounded, value: '${balance.earnedPoints}', label: 'Earned', iconColor: Colors.green.shade100),
-                _buildEnhancedMiniStat(icon: Icons.shopping_cart_rounded, value: '${balance.spentPoints}', label: 'Spent', iconColor: Colors.orange.shade100),
-                _buildEnhancedMiniStat(icon: Icons.schedule_rounded, value: '~${stats['estimatedDaysToNextReward']}d', label: 'Next Reward', iconColor: Colors.blue.shade100),
-              ],
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+              ),
+              child: const Icon(Icons.star_rounded, color: Colors.white, size: 34),
             ),
           ],
         );
@@ -218,96 +215,12 @@ class _RewardsState extends State<Rewards> {
     );
   }
 
-  Widget _buildEnhancedMiniStat({required IconData icon, required String value, required String label, required Color iconColor}) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: iconColor.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, size: 20, color: iconColor.withOpacity(0.9)),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.8))),
-      ],
-    );
-  }
-
-  Widget _buildEnhancedCategoryFilter() {
-    final categories = [
-      {'value': 'all', 'label': 'All', 'icon': Icons.all_inclusive_rounded, 'color': Get.theme.colorScheme.primary},
-      {'value': 'discount', 'label': 'Discounts', 'icon': Icons.discount_rounded, 'color': Colors.green.shade600},
-      {'value': 'service', 'label': 'Services', 'icon': Icons.medical_services_rounded, 'color': Colors.blue.shade600},
-      {'value': 'premium', 'label': 'Premium', 'icon': Icons.diamond_rounded, 'color': Colors.purple.shade600},
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Categories',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-          ),
-          const SizedBox(height: 12),
-          Obx(() {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: categories.map((category) {
-                  final isSelected = rewardCtrl.selectedCategory == category['value'];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected ? category['color'] as Color : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: isSelected ? category['color'] as Color : Colors.grey.shade300, width: isSelected ? 0 : 1.5),
-                        boxShadow: isSelected
-                            ? [BoxShadow(color: (category['color'] as Color).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
-                            : [BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 2))],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => rewardCtrl.setCategory(category['value'] as String),
-                          borderRadius: BorderRadius.circular(14),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            child: Row(
-                              children: [
-                                Icon(category['icon'] as IconData, size: 18, color: isSelected ? Colors.white : category['color'] as Color),
-                                const SizedBox(width: 8),
-                                Text(
-                                  category['label'] as String,
-                                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: isSelected ? Colors.white : Colors.black87),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEnhancedRewardCard(Reward reward) {
-    final daysLeft = reward.daysUntilExpiry;
-    final isLimited = reward.isLimited && reward.remainingQuantity > 0;
-    final canRedeem = rewardCtrl.pointsBalance.availablePoints >= reward.pointsRequired;
+    final Color categoryColor = Colors.indigo;
+    final IconData categoryIcon = Icons.card_giftcard;
+    final canRedeem = rewardCtrl.pointsBalance >= reward.points;
     return InkWell(
-      onTap: canRedeem && reward.isAvailable ? () => _showRedeemConfirmation(reward) : null,
+      onTap: canRedeem ? () => _showRedeemConfirmation(reward) : null,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
@@ -322,7 +235,7 @@ class _RewardsState extends State<Rewards> {
               height: 140,
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [_getCategoryColor(reward.category), _getCategoryColor(reward.category).withOpacity(0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                gradient: LinearGradient(colors: [categoryColor, categoryColor.withOpacity(0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
               ),
               child: Stack(
@@ -338,7 +251,7 @@ class _RewardsState extends State<Rewards> {
                           Icon(Icons.star_rounded, size: 14, color: Colors.white),
                           const SizedBox(width: 4),
                           Text(
-                            '${reward.pointsRequired}',
+                            '${reward.points}',
                             style: GoogleFonts.poppins(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600),
                           ),
                         ],
@@ -352,18 +265,8 @@ class _RewardsState extends State<Rewards> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
-                          child: Icon(_getCategoryIcon(reward.category), size: 40, color: Colors.white),
+                          child: Icon(categoryIcon, size: 40, color: Colors.white),
                         ),
-                        const SizedBox(height: 12),
-                        if (isLimited)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                            child: Text(
-                              '${reward.remainingQuantity} left',
-                              style: GoogleFonts.poppins(fontSize: 11, color: Colors.orange.shade700, fontWeight: FontWeight.w600),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -400,28 +303,9 @@ class _RewardsState extends State<Rewards> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            if (daysLeft > 0)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: daysLeft < 7 ? Colors.red.shade50 : Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: daysLeft < 7 ? Colors.red.shade200 : Colors.grey.shade300),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.timer_rounded, size: 12, color: daysLeft < 7 ? Colors.red.shade600 : Colors.grey.shade600),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${daysLeft}d',
-                                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: daysLeft < 7 ? Colors.red.shade600 : Colors.grey.shade600),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             Text(
-                              '${reward.pointsRequired} points',
-                              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: _getCategoryColor(reward.category)),
+                              '${reward.points} points',
+                              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: categoryColor),
                             ),
                           ],
                         ),
@@ -430,14 +314,14 @@ class _RewardsState extends State<Rewards> {
                           height: 42,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: canRedeem ? _getCategoryColor(reward.category) : Colors.grey.shade300,
+                            color: canRedeem ? Get.theme.colorScheme.primary : Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: canRedeem ? [BoxShadow(color: _getCategoryColor(reward.category).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))] : null,
+                            boxShadow: canRedeem ? [BoxShadow(color: Get.theme.colorScheme.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))] : null,
                           ),
                           child: Center(
                             child: Text(
-                              canRedeem ? 'Redeem Now' : 'Need ${reward.pointsRequired - rewardCtrl.pointsBalance.availablePoints} more',
-                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: canRedeem ? Colors.white : Colors.grey.shade600),
+                              canRedeem ? 'Redeem Now' : 'Need ${reward.points - rewardCtrl.pointsBalance.value} more',
+                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
                             ),
                           ),
                         ),
@@ -456,48 +340,12 @@ class _RewardsState extends State<Rewards> {
   Widget _buildHistoryTab() {
     return RefreshIndicator(
       onRefresh: () async {
-        await rewardCtrl.loadRewards();
+        await rewardCtrl.loadTransactions(reset: true);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            const SizedBox(height: 16),
-            _buildEnhancedHistoryFilter(),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() {
-                final stats = rewardCtrl.getRewardStats();
-                return Row(
-                  children: [
-                    Expanded(
-                      child: _buildEnhancedStatCard(
-                        icon: Icons.receipt_long_rounded,
-                        value: '${stats['totalTransactions']}',
-                        label: 'Total',
-                        color: Colors.blue.shade50,
-                        iconColor: Colors.blue.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildEnhancedStatCard(icon: Icons.check_circle_rounded, value: '${stats['usedRewards']}', label: 'Used', color: Colors.green.shade50, iconColor: Colors.green.shade600),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildEnhancedStatCard(
-                        icon: Icons.pending_rounded,
-                        value: '${stats['pendingRewards']}',
-                        label: 'Pending',
-                        color: Colors.orange.shade50,
-                        iconColor: Colors.orange.shade600,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -505,8 +353,8 @@ class _RewardsState extends State<Rewards> {
                 if (rewardCtrl.isLoading) {
                   return _buildShimmerList();
                 }
-                final transactions = rewardCtrl.filteredTransactions;
-                if (rewardCtrl.filteredTransactions.isEmpty) {
+                final transactions = rewardCtrl.transactions;
+                if (rewardCtrl.transactions.isEmpty) {
                   return _buildEmptyHistoryState();
                 }
                 return Column(
@@ -538,105 +386,10 @@ class _RewardsState extends State<Rewards> {
     );
   }
 
-  Widget _buildEnhancedHistoryFilter() {
-    final filters = [
-      {'value': 'all', 'label': 'All', 'icon': Icons.all_inclusive_rounded, 'color': Get.theme.colorScheme.primary},
-      {'value': 'pending', 'label': 'Pending', 'icon': Icons.pending_rounded, 'color': Colors.orange.shade600},
-      {'value': 'completed', 'label': 'Used', 'icon': Icons.check_circle_rounded, 'color': Colors.green.shade600},
-      {'value': 'expired', 'label': 'Expired', 'icon': Icons.timer_off_rounded, 'color': Colors.red.shade600},
-      {'value': 'cancelled', 'label': 'Cancelled', 'icon': Icons.cancel_rounded, 'color': Colors.grey.shade600},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Filter by Status',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Obx(() {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: filters.map((filter) {
-                final isSelected = rewardCtrl.selectedFilter == filter['value'];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected ? filter['color'] as Color : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isSelected ? filter['color'] as Color : Colors.grey.shade300, width: isSelected ? 0 : 1.5),
-                      boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 2))],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => rewardCtrl.setFilter(filter['value'].toString()),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              Icon(filter['icon'] as IconData, size: 16, color: isSelected ? Colors.white : filter['color'] as Color),
-                              const SizedBox(width: 8),
-                              Text(
-                                filter['label'] as String,
-                                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: isSelected ? Colors.white : Colors.black87),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildEnhancedStatCard({required IconData icon, required String value, required String label, required Color color, required Color iconColor}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: iconColor.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                child: Icon(icon, size: 20, color: iconColor),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                value,
-                style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(label, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEnhancedTransactionCard(RewardTransaction transaction) {
+  Widget _buildEnhancedTransactionCard(PatientPointTransaction transaction) {
+    final Color statusColor = transaction.type == 'Credit' ? Colors.green.shade600 : Colors.red.shade600;
+    final String statusText = transaction.type == 'Credit' ? 'Credit' : 'Debit';
+    final String pointsText = '${transaction.type == 'Credit' ? '+' : '-'}${transaction.points} points';
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -648,85 +401,49 @@ class _RewardsState extends State<Rewards> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    transaction.rewardTitle,
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: _getStatusColor(transaction.status).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                  child: Text(
-                    _getStatusText(transaction.status),
-                    style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: _getStatusColor(transaction.status)),
-                  ),
-                ),
-              ],
+            Text(
+              transaction.description,
+              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildTransactionDetail(icon: Icons.star_rounded, text: '${transaction.pointsUsed} points', color: Colors.amber.shade600),
+                _buildTransactionDetail(icon: Icons.star_rounded, text: pointsText, color: statusColor),
                 const SizedBox(width: 16),
-                _buildTransactionDetail(icon: Icons.calendar_month_rounded, text: DateFormat('MMM dd, yyyy').format(transaction.redeemedAt), color: Colors.grey.shade600),
+                _buildTransactionDetail(icon: Icons.calendar_month_rounded, text: DateFormat('MMM dd, yyyy').format(transaction.createdAt), color: Colors.grey.shade600),
               ],
             ),
-            if (transaction.redemptionCode != null && transaction.redemptionCode!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: _buildTransactionDetail(icon: Icons.qr_code_rounded, text: 'Code: ${transaction.redemptionCode}', color: Colors.green.shade600),
-              ),
-            if (transaction.notes != null && transaction.notes!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  transaction.notes.toString(),
-                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            if (transaction.status == 'pending')
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => rewardCtrl.markAsUsed(transaction.id),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade50,
-                          foregroundColor: Colors.green.shade700,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        icon: const Icon(Icons.check_rounded, size: 18),
-                        label: const Text('Mark as Used', style: TextStyle(fontSize: 12)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: _buildTransactionDetail(icon: Icons.account_balance_wallet_rounded, text: 'Balance: ${transaction.balanceAfter} points', color: Colors.grey.shade600),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showCancelConfirmation(transaction),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade50,
-                          foregroundColor: Colors.red.shade700,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      if (transaction.source != 'Admin')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: _buildTransactionDetail(icon: Icons.autorenew_rounded, text: 'Source: ${transaction.source}', color: Colors.blue.shade600),
                         ),
-                        icon: const Icon(Icons.close_rounded, size: 18),
-                        label: const Text('Cancel', style: TextStyle(fontSize: 12)),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                  child: Text(
+                    statusText,
+                    style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -861,20 +578,9 @@ class _RewardsState extends State<Rewards> {
               children: [
                 Icon(Icons.star, size: 16, color: Colors.amber.shade600),
                 const SizedBox(width: 4),
-                Text('${reward.pointsRequired} points', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                Text('${reward.points} points', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               ],
             ),
-            if (reward.daysUntilExpiry > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.timer, size: 16, color: Colors.orange.shade600),
-                    const SizedBox(width: 4),
-                    Text('Expires in ${reward.daysUntilExpiry} days', style: GoogleFonts.poppins(color: Colors.orange.shade700)),
-                  ],
-                ),
-              ),
           ],
         ),
         actions: [
@@ -882,8 +588,9 @@ class _RewardsState extends State<Rewards> {
           ElevatedButton(
             onPressed: () async {
               Get.close(1);
-              final success = await rewardCtrl.redeemReward(reward);
-              if (success) {}
+              final service = ServiceModel(id: reward.service["_id"], name: reward.service["name"], points: reward.points, charge: reward.service["charge"], images: [], isActive: true);
+              await Get.to(() => BookingAppointment(service: service));
+              await rewardCtrl.loadPointsBalance();
             },
             style: ElevatedButton.styleFrom(backgroundColor: Get.theme.colorScheme.primary),
             child: const Text('Confirm Redeem'),
@@ -891,81 +598,5 @@ class _RewardsState extends State<Rewards> {
         ],
       ),
     );
-  }
-
-  void _showCancelConfirmation(RewardTransaction transaction) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Cancel Redemption', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        content: Text('Are you sure you want to cancel this reward redemption?', style: GoogleFonts.poppins()),
-        actions: [
-          TextButton(onPressed: () => Get.close(1), child: const Text('No')),
-          ElevatedButton(
-            onPressed: () {
-              Get.close(1);
-              rewardCtrl.cancelTransaction(transaction.id);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'completed':
-        return 'Used';
-      case 'pending':
-        return 'Pending';
-      case 'expired':
-        return 'Expired';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'discount':
-        return Colors.green.shade600;
-      case 'service':
-        return Colors.blue.shade600;
-      case 'premium':
-        return Colors.purple.shade600;
-      default:
-        return Get.theme.colorScheme.primary;
-    }
-  }
-
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'discount':
-        return Icons.discount_rounded;
-      case 'service':
-        return Icons.medical_services_rounded;
-      case 'premium':
-        return Icons.diamond_rounded;
-      default:
-        return Icons.card_giftcard_rounded;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'completed':
-        return Colors.green.shade600;
-      case 'pending':
-        return Colors.orange.shade600;
-      case 'expired':
-        return Colors.red.shade600;
-      case 'cancelled':
-        return Colors.grey.shade600;
-      default:
-        return Colors.grey.shade600;
-    }
   }
 }

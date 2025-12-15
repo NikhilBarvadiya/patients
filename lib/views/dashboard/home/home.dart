@@ -3,13 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:patients/models/target_model.dart';
 import 'package:patients/utils/decoration.dart';
 import 'package:patients/utils/theme/light.dart';
 import 'package:patients/views/dashboard/profile/ui/settings.dart';
 import 'package:patients/views/dashboard/reward/reward.dart';
-import 'package:patients/views/dashboard/target/target.dart';
-import 'package:patients/views/dashboard/target/target_ctrl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:patients/views/dashboard/home/home_ctrl.dart';
 import 'package:patients/views/dashboard/services/ui/service_card.dart';
@@ -51,7 +48,6 @@ class Home extends StatelessWidget {
                   ),
                 ),
               ),
-              _buildTargetsOverviewSection(),
               _buildRegularServices(),
               const SliverToBoxAdapter(child: SizedBox(height: 5)),
               _buildPendingAppointments(),
@@ -66,168 +62,6 @@ class Home extends StatelessWidget {
           }),
         ],
       ),
-    );
-  }
-
-  Widget _buildTargetsOverviewSection() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: GetBuilder<TargetCtrl>(
-          init: TargetCtrl(),
-          builder: (targetCtrl) {
-            final stats = targetCtrl.getStats();
-            final activeTargets = targetCtrl.activeTargets.take(3).toList();
-            return Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Health Goals',
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                    ),
-                    TextButton(
-                      onPressed: () => Get.to(() => Targets()),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Manage',
-                            style: GoogleFonts.poppins(color: const Color(0xFF2563EB), fontSize: 12, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 12, color: const Color(0xFF2563EB)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildStatsCards(stats),
-                if (activeTargets.isNotEmpty) ...[const SizedBox(height: 16), _buildProgressChart(activeTargets)],
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsCards(Map<String, dynamic> stats) {
-    return Row(
-      children: [
-        Expanded(child: _buildStatCard('Active', stats['active'].toString(), Icons.trending_up, const Color(0xFF4CAF50))),
-        const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Progress', '${(stats['progress'] * 100).toStringAsFixed(0)}%', Icons.bar_chart, const Color(0xFF2196F3))),
-        const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Streak', '${stats['streak']} days', Icons.local_fire_department, const Color(0xFFFF9800))),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.grey.shade700),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressChart(List<Target> targets) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Today\'s Progress',
-                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                child: Text(
-                  DateFormat('MMM dd').format(DateTime.now()),
-                  style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: const Color(0xFF2563EB)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Column(
-            children: targets.map((target) {
-              return Padding(padding: const EdgeInsets.only(bottom: 12), child: _buildChartItem(target));
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChartItem(Target target) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(color: target.color, shape: BoxShape.circle),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  target.title,
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade800),
-                ),
-              ],
-            ),
-            Text(
-              '${target.progressPercentage}%',
-              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: target.progressPercentage >= 70 ? const Color(0xFF4CAF50) : Colors.grey.shade600),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(value: target.progress, backgroundColor: Colors.grey.shade100, color: target.color, minHeight: 6),
-        ),
-      ],
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ServiceModel {
   final String id;
   final String name;
+  final int? points;
   final int? charge;
   final int? lowCharge;
   final int? highCharge;
@@ -11,12 +12,13 @@ class ServiceModel {
   final List<String> images;
   bool isActive;
 
-  ServiceModel({required this.id, required this.name, this.charge, this.lowCharge, this.highCharge, this.icon, this.description, required this.isActive, required this.images});
+  ServiceModel({required this.id, required this.name, this.points, this.charge, this.lowCharge, this.highCharge, this.icon, this.description, required this.isActive, required this.images});
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
     return ServiceModel(
       id: json['_id'],
       name: json['name'],
+      points: json['points'] ?? 0,
       charge: json['charge'] ?? 0,
       lowCharge: json['lowCharge'] ?? 0,
       highCharge: json['highCharge'] ?? 0,
