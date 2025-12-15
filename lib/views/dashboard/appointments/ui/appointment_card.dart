@@ -83,22 +83,22 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                 Expanded(
                                   child: Text('No doctor assigned', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600)),
                                 ),
-                              if (!hasMultipleDoctors)
+                              if (!hasMultipleDoctors && primaryDoctor != null)
                                 Expanded(
                                   child: Text(
-                                    _getDoctorName(primaryDoctor!),
+                                    _getDoctorName(primaryDoctor),
                                     style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              if (appointment.doctors.isNotEmpty && hasMultipleDoctors)
+                              if (appointment.doctors.isNotEmpty && hasMultipleDoctors && primaryDoctor != null)
                                 Expanded(
                                   child: Row(
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _getDoctorName(primaryDoctor!),
+                                          _getDoctorName(primaryDoctor),
                                           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,

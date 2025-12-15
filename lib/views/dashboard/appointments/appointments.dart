@@ -123,6 +123,7 @@ class _AppointmentsState extends State<Appointments> {
       backgroundColor: Colors.white,
       pinned: true,
       floating: true,
+      automaticallyImplyLeading: false,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
