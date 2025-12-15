@@ -8,13 +8,11 @@ import '../../../models/patient_request_model.dart';
 
 class AppointmentsCtrl extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
-  var selectedFilter = 'All'.obs, selectedPaymentMethod = 'Online'.obs, selectedDateRange = 'All Time'.obs;
+  var selectedFilter = 'All'.obs, searchQuery = ''.obs, selectedDateRange = 'All Time'.obs;
   final filters = ['All', 'Pending', 'Accepted', 'Completed', 'Cancelled'];
-  final paymentMethods = ['Online', 'Offline'];
   final dateRanges = ['All Time', 'Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'This Month', 'Last Month', 'Custom Range'];
   var customStartDate = Rx<DateTime?>(null), customEndDate = Rx<DateTime?>(null);
   var appointments = <PatientRequestModel>[].obs;
-  var filteredAppointments = <PatientRequestModel>[].obs;
   var isLoading = false.obs, isLoadMoreLoading = false.obs, hasMore = true.obs;
   var isSubmittingReview = false.obs, isCancelling = false.obs;
   var currentPage = 1.obs, totalDocs = 0.obs;
@@ -100,7 +98,6 @@ class AppointmentsCtrl extends GetxController {
         currentPage.value = 1;
         hasMore.value = true;
         appointments.clear();
-        filteredAppointments.clear();
       } else {
         if (!hasMore.value || isLoadMoreLoading.value) return;
         isLoadMoreLoading.value = true;
@@ -110,7 +107,9 @@ class AppointmentsCtrl extends GetxController {
       if (selectedFilter.value != 'All') {
         params['status'] = selectedFilter.value.toLowerCase();
       }
-      params['paymentMethod'] = selectedPaymentMethod.value.toLowerCase();
+      if (searchQuery.value != '') {
+        params['search'] = searchQuery.value.toLowerCase();
+      }
       final dateParams = _getDateParameters();
       params.addAll(dateParams);
       final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
@@ -124,7 +123,6 @@ class AppointmentsCtrl extends GetxController {
           } else {
             appointments.assignAll(parsedServices);
           }
-          filteredAppointments.assignAll(appointments);
           final totalPages = response['totalPages'] ?? 1;
           final currentPageNum = response['currentPage'] ?? currentPage.value;
           totalDocs.value = response['totalDocs'] ?? 0;
@@ -158,15 +156,13 @@ class AppointmentsCtrl extends GetxController {
     return Future.value();
   }
 
-  void changeFilter(String filter) {
-    selectedFilter.value = filter;
-    currentPage.value = 1;
-    update();
-    loadAppointments();
+  void searchAppointments(String query) {
+    searchQuery.value = query.trim();
+    debounce<String>(searchQuery, (_) => loadAppointments(), time: const Duration(milliseconds: 500));
   }
 
-  void changePaymentMethod(String method) {
-    selectedPaymentMethod.value = method;
+  void changeFilter(String filter) {
+    selectedFilter.value = filter;
     currentPage.value = 1;
     update();
     loadAppointments();
@@ -177,7 +173,7 @@ class AppointmentsCtrl extends GetxController {
       isCancelling.value = true;
       final response = await _authService.cancelRequests(requestId: appointmentId);
       if (response != null) {
-        filteredAppointments.removeWhere((app) => app.id == appointmentId);
+        appointments.removeWhere((app) => app.id == appointmentId);
         toaster.success("Your appointment has been cancelled successfully");
       } else {
         throw Exception('Failed to cancel appointment');
@@ -198,7 +194,6 @@ class AppointmentsCtrl extends GetxController {
         if (index != -1) {
           appointments[index].rating = rating;
           appointments[index].feedback = feedback;
-          filteredAppointments.assignAll(appointments);
         }
         Get.close(1);
         toaster.success("Thank you for your feedback");

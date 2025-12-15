@@ -210,9 +210,10 @@ class Register extends StatelessWidget {
       inputFormatters: inputFormatters,
       textCapitalization: textCapitalization,
       autofillHints: autofillHints,
-      style: TextStyle(fontSize: 12, letterSpacing: .5),
+      style: TextStyle(fontSize: 14, letterSpacing: .5),
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: TextStyle(fontSize: 12, letterSpacing: .5, color: Colors.grey.shade400),
         prefixIcon: Icon(icon, size: 20, color: decoration.colorScheme.primary),
         suffixIcon: suffixIcon != null || suffixLoading
             ? suffixLoading

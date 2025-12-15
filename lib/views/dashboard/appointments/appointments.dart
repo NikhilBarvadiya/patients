@@ -14,6 +14,7 @@ class Appointments extends StatefulWidget {
 }
 
 class _AppointmentsState extends State<Appointments> {
+  final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -53,7 +54,7 @@ class _AppointmentsState extends State<Appointments> {
                   CustomScrollView(
                     controller: scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [_buildAppBar(ctrl), _buildFilterChips(ctrl), _buildPaymentMethodChips(ctrl), _buildAppointmentsList(ctrl)],
+                    slivers: [_buildAppBar(ctrl), _buildSearchBar(ctrl), _buildFilterChips(ctrl), _buildAppointmentsList(ctrl)],
                   ),
                   Obx(() {
                     if (ctrl.isCancelling.value || ctrl.isSubmittingReview.value) {
@@ -172,6 +173,45 @@ class _AppointmentsState extends State<Appointments> {
     );
   }
 
+  Widget _buildSearchBar(AppointmentsCtrl ctrl) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+          ),
+          child: TextField(
+            controller: searchController,
+            style: GoogleFonts.poppins(fontSize: 15),
+            decoration: InputDecoration(
+              hintText: 'Search by name, service...',
+              hintStyle: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 15),
+              prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[500], size: 22),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              suffixIcon: searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear_rounded, color: Colors.grey[500], size: 20),
+                      onPressed: () {
+                        searchController.clear();
+                        ctrl.searchAppointments('');
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            onChanged: (value) {
+              ctrl.searchAppointments(value);
+              setState(() {});
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips(AppointmentsCtrl ctrl) {
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -231,87 +271,23 @@ class _AppointmentsState extends State<Appointments> {
     }
   }
 
-  Widget _buildPaymentMethodChips(AppointmentsCtrl ctrl) {
-    return SliverToBoxAdapter(
-      child: SizedBox(
-        height: 50,
-        child: ListView.builder(
-          shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: ctrl.paymentMethods.length,
-          itemBuilder: (context, index) {
-            final method = ctrl.paymentMethods[index];
-            final isSelected = ctrl.selectedPaymentMethod.value == method;
-            return _buildPaymentMethodChip(method, isSelected, ctrl).paddingOnly(right: 8);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodChip(String label, bool isSelected, AppointmentsCtrl ctrl) {
-    final icon = _getPaymentMethodIcon(label);
-    return FilterChip(
-      avatar: isSelected ? null : Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.grey[600]),
-      label: Text(
-        label,
-        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.grey[700]),
-      ),
-      selected: isSelected,
-      onSelected: (selected) => ctrl.changePaymentMethod(label),
-      backgroundColor: Colors.white,
-      selectedColor: _getPaymentMethodColor(label),
-      checkmarkColor: Colors.white,
-      elevation: isSelected ? 2 : 0,
-      shadowColor: _getPaymentMethodColor(label).withOpacity(0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: isSelected ? _getPaymentMethodColor(label) : Colors.grey[300]!),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-    );
-  }
-
-  Color _getPaymentMethodColor(String method) {
-    switch (method) {
-      case 'Online':
-        return const Color(0xFF10B981);
-      case 'Offline':
-        return const Color(0xFFF59E0B);
-      default:
-        return AppTheme.primaryBlue;
-    }
-  }
-
-  IconData _getPaymentMethodIcon(String method) {
-    switch (method) {
-      case 'Online':
-        return Icons.payment_rounded;
-      case 'Offline':
-        return Icons.money_off_csred_rounded;
-      default:
-        return Icons.payments_rounded;
-    }
-  }
-
   Widget _buildAppointmentsList(AppointmentsCtrl ctrl) {
     return Obx(() {
       if (ctrl.isLoading.value && ctrl.appointments.isEmpty) {
         return _buildAppointmentsShimmer();
-      } else if (ctrl.filteredAppointments.isEmpty) {
+      } else if (ctrl.appointments.isEmpty) {
         return SliverFillRemaining(child: _buildEmptyState(ctrl));
       } else {
         return SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              if (index == ctrl.filteredAppointments.length) {
+              if (index == ctrl.appointments.length) {
                 return ctrl.hasMore.value ? _buildLoadingItem() : const SizedBox(height: 20);
               }
-              final appointment = ctrl.filteredAppointments[index];
+              final appointment = ctrl.appointments[index];
               return AppointmentCard(appointment: appointment).paddingOnly(bottom: 12);
-            }, childCount: ctrl.filteredAppointments.length + 1),
+            }, childCount: ctrl.appointments.length + 1),
           ),
         );
       }
